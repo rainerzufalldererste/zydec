@@ -69,6 +69,18 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   switch (pInstruction->mnemonic)
   {
   case ZYDIS_MNEMONIC_MOV:
+  case ZYDIS_MNEMONIC_MOVBE:
+  case ZYDIS_MNEMONIC_MOVDIR64B:
+  case ZYDIS_MNEMONIC_MOVDIRI:
+  case ZYDIS_MNEMONIC_MOVLPD:
+  case ZYDIS_MNEMONIC_MOVLPS:
+  case ZYDIS_MNEMONIC_MOVNTI:
+  case ZYDIS_MNEMONIC_MOVNTQ:
+  case ZYDIS_MNEMONIC_MOVNTSD:
+  case ZYDIS_MNEMONIC_MOVNTSS:
+  case ZYDIS_MNEMONIC_MOVQ2DQ:
+  case ZYDIS_MNEMONIC_MOVSX:
+  case ZYDIS_MNEMONIC_MOVZX:
   case ZYDIS_MNEMONIC_CBW:
   case ZYDIS_MNEMONIC_CDQ:
   case ZYDIS_MNEMONIC_CDQE:
@@ -77,10 +89,48 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_KMOVD:
   case ZYDIS_MNEMONIC_KMOVQ:
   case ZYDIS_MNEMONIC_KMOVW:
+  {
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+    
+    switch (pInstruction->mnemonic)
+    {
+    case ZYDIS_MNEMONIC_MOVBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "__byteswap("));
+      break;
+
+    case ZYDIS_MNEMONIC_MOVDIR64B:
+    case ZYDIS_MNEMONIC_MOVDIRI:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "__atomic_write("));
+      break;
+
+    default:
+      break;
+    }
+
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress, pInfo));
+
+    switch (pInstruction->mnemonic)
+    {
+    case ZYDIS_MNEMONIC_MOVBE:
+    case ZYDIS_MNEMONIC_MOVDIR64B:
+    case ZYDIS_MNEMONIC_MOVDIRI:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ")"));
+      break;
+
+    case ZYDIS_MNEMONIC_MOVNTI:
+    case ZYDIS_MNEMONIC_MOVNTQ:
+    case ZYDIS_MNEMONIC_MOVNTSD:
+    case ZYDIS_MNEMONIC_MOVNTSS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // move with non-temporal hint"));
+      return true;
+
+    default:
+      break;
+    }
+  
     break;
+  }
 
   case ZYDIS_MNEMONIC_LEA:
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
