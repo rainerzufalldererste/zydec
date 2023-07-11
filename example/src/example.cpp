@@ -30,6 +30,7 @@
 
 #include <stdio.h>
 #include <inttypes.h>
+#include <stdlib.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -81,6 +82,7 @@ int main(int argc, char **pArgv)
 
   char disasmBuffer[1024] = "";
   char decompBuffer[1024] = "";
+  ZydecFormattingInfo info;
   
   while (virtualAddress < fileSize)
   {
@@ -89,7 +91,7 @@ int main(int argc, char **pArgv)
 
     bool hasTranslation = false;
 
-    if (!zydec_TranslateInstructionWithoutContext(&instruction, operands, sizeof(operands) / sizeof(operands[0]), virtualAddress + addressDisplayOffset, decompBuffer, sizeof(decompBuffer), &hasTranslation) || !hasTranslation)
+    if (!zydec_TranslateInstructionWithoutContext(&instruction, operands, sizeof(operands) / sizeof(operands[0]), virtualAddress + addressDisplayOffset, decompBuffer, sizeof(decompBuffer), &hasTranslation, &info) || !hasTranslation)
       decompBuffer[0] = '\0';
 
     printf("% 8" PRIX64 " | %-64s | %s\n", virtualAddress + addressDisplayOffset, disasmBuffer, decompBuffer);

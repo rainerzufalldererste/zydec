@@ -41,7 +41,18 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct ZydecFormattingInfo
+{
+  // Returns `true` on success.
+  typedef bool ResolveAddressToFriendlyName(const size_t virtualAddress, char *friendlyName, const size_t friendlyNameCapacity, size_t *pOffsetFromStart, void *pUserData);
+
+  ResolveAddressToFriendlyName *pResolveAddressToFriendlyName = nullptr;
+  void *pUserData = nullptr;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Currently requires all 10 operands.
-bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation);
+bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation, ZydecFormattingInfo *pInfo);
 
 #endif // zydec_h__
