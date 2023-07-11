@@ -41,6 +41,7 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Currently requires all 10 operands.
 bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation);
 
 #endif // zydec_h__
