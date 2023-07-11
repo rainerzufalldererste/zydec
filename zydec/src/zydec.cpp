@@ -33,7 +33,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 bool zydec_WriteRaw(char **pBufferPos, size_t *pRemainingSize, const char *text);
-bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDecodedOperand *pOperand, const size_t virtualAddress);
+bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDecodedOperand *pOperand, const size_t virtualAddress, const bool derefPointers = true);
 bool zydec_WriteRegister(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg);
 bool zydec_WriteHex(char **pBufferPos, size_t *pRemainingSize, const uint64_t value);
 bool zydec_WriteUInt(char **pBufferPos, size_t *pRemainingSize, const uint64_t value);
@@ -87,9 +87,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress));
 
     if (pInstruction->mnemonic == ZYDIS_MNEMONIC_TEST)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ") // set carry_flag, parity_flag, zero_flag"));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ") // set flags: carry, parity, zero"));
     else if (pInstruction->mnemonic == ZYDIS_MNEMONIC_CMP)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ") // set carry_flag, overflow_flag, signed_flag, zero_flag, aux_carry_flag and parity_flag"));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ") // set flags: carry, overflow, signed, zero, aux_carry and parity"));
     else
       return false;
 
@@ -310,6 +310,48 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     break;
   }
 
+  case ZYDIS_MNEMONIC_MUL:
+  case ZYDIS_MNEMONIC_IMUL:
+  {
+    if (pInstruction->operand_count == 1)
+    {
+      if (pOperands[0].element_size < 16)
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(i16)a = (i8)a * "));
+      else if (pOperands[0].element_size < 32)
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "[(i16)d, (i64)a] = (i16)a * "));
+      else if (pOperands[0].element_size < 64)
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "[(i32)d, (i32)a] = (i32)a * "));
+      else
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "[(i64)d, (i64)a] = (i64)a * "));
+
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress));
+    }
+    else if (pInstruction->operand_count == 2)
+    {
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " *= "));
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress));
+    }
+    else
+    {
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " * "));
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[2], virtualAddress));
+    }
+
+    switch (pInstruction->mnemonic)
+    {
+    case ZYDIS_MNEMONIC_DIV:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // unsigned integer multiply"));
+    case ZYDIS_MNEMONIC_IDIV:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // signed integer multiply"));
+    }
+
+    return true;
+  }
+
   case ZYDIS_MNEMONIC_DIV:
   case ZYDIS_MNEMONIC_IDIV:
   {
@@ -367,24 +409,27 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
   case ZYDIS_MNEMONIC_BSF:
   {
-    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "__bitscan_forward("));
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress));
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = __bitscan_forward("));
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress));
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ")"));
     break;
   }
 
   case ZYDIS_MNEMONIC_BSR:
   {
-    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "__bitscan_reverse("));
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress));
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = __bitscan_reverse("));
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress));
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ")"));
     break;
   }
 
   case ZYDIS_MNEMONIC_POPCNT:
   {
-    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "__popcnt("));
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress));
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = __popcnt("));
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress));
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ")"));
     break;
   }
@@ -473,7 +518,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       }
     }
 
-    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress));
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, false));
 
     if (isReg2RegMove)
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
@@ -485,7 +530,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       if (operandIndex > 1)
         ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ", "));
 
-      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[operandIndex], virtualAddress));
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[operandIndex], virtualAddress, false));
     }
 
     if (!isReg2RegMove)
@@ -612,7 +657,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       }
     }
 
-    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress));
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, false));
 
     if (isReg2RegMove)
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
@@ -624,7 +669,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       if (operandIndex > 1)
         ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ", "));
 
-      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[operandIndex], virtualAddress));
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[operandIndex], virtualAddress, false));
     }
 
     if (!isReg2RegMove)
@@ -1195,6 +1240,8 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
     }
 
+    bool addressParam = false;
+
     switch (pInstruction->mnemonic)
     {
     case ZYDIS_MNEMONIC_PAND:
@@ -1551,10 +1598,12 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
     case ZYDIS_MNEMONIC_CLFLUSH:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_clflush("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_CLFLUSHOPT:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_clflushopt("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_CMPSS:
@@ -2033,34 +2082,42 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
     case ZYDIS_MNEMONIC_VPGATHERDD:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_i32gather_epi32("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_VPGATHERDQ:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_i32gather_epi64("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_VGATHERDPD:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_i32gather_pd("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_VGATHERDPS:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_i32gather_ps("));
+      addressParam = true;
       break;
       
     case ZYDIS_MNEMONIC_VPGATHERQD:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_i64gather_epi32("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_VPGATHERQQ:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_i64gather_epi64("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_VGATHERQPD:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_i64gather_pd("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_VGATHERQPS:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_i64gather_ps("));
+      addressParam = true;
       break;
 
     case ZYDIS_MNEMONIC_PINSRB:
@@ -2250,11 +2307,15 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
     case ZYDIS_MNEMONIC_MOVDDUP:
     case ZYDIS_MNEMONIC_VMOVDDUP:
+    {
       if (pOperands[1].type == ZYDIS_OPERAND_TYPE_MEMORY || pOperands[1].type == ZYDIS_OPERAND_TYPE_POINTER)
         ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_loaddup_pd("));
       else
         ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_movedup_pd("));
+      addressParam = true;
+
       break;
+    }
 
     case ZYDIS_MNEMONIC_MOVSHDUP:
     case ZYDIS_MNEMONIC_VMOVSHDUP:
@@ -2716,7 +2777,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       if (operandIndex > 1)
         ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ", "));
 
-      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[operandIndex], virtualAddress));
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[operandIndex], virtualAddress, !addressParam));
     }
 
     switch (pInstruction->mnemonic)
@@ -3202,7 +3263,7 @@ bool zydec_WriteInt(char **pBufferPos, size_t *pRemainingSize, const int64_t val
   }
 }
 
-bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDecodedOperand *pOperand, const size_t virtualAddress)
+bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDecodedOperand *pOperand, const size_t virtualAddress, const bool derefPointers /* = true */)
 {
   switch (pOperand->type)
   {
@@ -3214,7 +3275,7 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
 
   case ZYDIS_OPERAND_TYPE_MEMORY:
   {
-    ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, pOperand->mem.type == ZYDIS_MEMOP_TYPE_AGEN ? "(" : "*("));
+    ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, (pOperand->mem.type == ZYDIS_MEMOP_TYPE_AGEN || !derefPointers) ? "(" : "*("));
 
     switch (pOperand->mem.type)
     {
@@ -3223,30 +3284,43 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
     {
       ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.segment));
       ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ": "));
-      ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base));
 
-      if (pOperand->mem.disp.has_displacement)
+      if (pOperand->mem.base == ZYDIS_REGISTER_RIP && (pOperand->mem.disp.has_displacement || pOperand->mem.index == ZYDIS_REGISTER_NONE))
       {
-        if (pOperand->mem.disp.value != 0)
+        uint64_t ptr = virtualAddress;
+
+        if (pOperand->mem.disp.has_displacement)
+          ptr += pOperand->mem.disp.value;
+
+        ERROR_CHECK(zydec_WriteHex(pBufferPos, pRemainingSize, ptr));
+      }
+      else
+      {
+        ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base));
+
+        if (pOperand->mem.disp.has_displacement)
+        {
+          if (pOperand->mem.disp.value != 0)
+          {
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
+            ERROR_CHECK(zydec_WriteInt(pBufferPos, pRemainingSize, pOperand->mem.disp.value));
+          }
+        }
+        else if (pOperand->mem.index != ZYDIS_REGISTER_NONE)
         {
           ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
-          ERROR_CHECK(zydec_WriteInt(pBufferPos, pRemainingSize, pOperand->mem.disp.value));
-        }
-      }
-      else if (pOperand->mem.index != ZYDIS_REGISTER_NONE)
-      {
-        ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
-        
-        if (pOperand->mem.scale != 1)
-          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "("));
 
-        ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.index));
+          if (pOperand->mem.scale != 1)
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "("));
 
-        if (pOperand->mem.scale != 1)
-        {
-          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " * "));
-          ERROR_CHECK(zydec_WriteUInt(pBufferPos, pRemainingSize, pOperand->mem.scale));
-          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
+          ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.index));
+
+          if (pOperand->mem.scale != 1)
+          {
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " * "));
+            ERROR_CHECK(zydec_WriteUInt(pBufferPos, pRemainingSize, pOperand->mem.scale));
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
+          }
         }
       }
 
@@ -3260,15 +3334,28 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
     {
       ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.segment));
       ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ": "));
-      ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base));
 
-      if (pOperand->mem.disp.has_displacement)
+      if (pOperand->mem.base == ZYDIS_REGISTER_RIP)
       {
-        ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
-        ERROR_CHECK(zydec_WriteInt(pBufferPos, pRemainingSize, pOperand->mem.disp.value));
-      }
+        uint64_t ptr = virtualAddress;
 
-      ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
+        if (pOperand->mem.disp.has_displacement)
+          ptr += pOperand->mem.disp.value;
+
+        ERROR_CHECK(zydec_WriteHex(pBufferPos, pRemainingSize, ptr));
+      }
+      else
+      {
+        ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base));
+
+        if (pOperand->mem.disp.has_displacement)
+        {
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
+          ERROR_CHECK(zydec_WriteInt(pBufferPos, pRemainingSize, pOperand->mem.disp.value));
+        }
+
+        ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
+      }
 
       break;
     }
