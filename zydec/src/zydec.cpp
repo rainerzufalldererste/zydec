@@ -326,12 +326,12 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       break;
 
     case ZYDIS_MNEMONIC_INC:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "++"));
-      break;
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "++;"));
+      return true;
 
     case ZYDIS_MNEMONIC_DEC:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "--"));
-      break;
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "--;"));
+      return true;
 
     case ZYDIS_MNEMONIC_SHL:
     case ZYDIS_MNEMONIC_SHLX:
