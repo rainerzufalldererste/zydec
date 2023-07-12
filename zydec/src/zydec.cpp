@@ -131,6 +131,147 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   
     break;
   }
+  
+  case ZYDIS_MNEMONIC_CMOVB:
+  case ZYDIS_MNEMONIC_CMOVBE:
+  case ZYDIS_MNEMONIC_CMOVL:
+  case ZYDIS_MNEMONIC_CMOVLE:
+  case ZYDIS_MNEMONIC_CMOVNB:
+  case ZYDIS_MNEMONIC_CMOVNBE:
+  case ZYDIS_MNEMONIC_CMOVNL:
+  case ZYDIS_MNEMONIC_CMOVNLE:
+  case ZYDIS_MNEMONIC_CMOVNO:
+  case ZYDIS_MNEMONIC_CMOVNP:
+  case ZYDIS_MNEMONIC_CMOVNS:
+  case ZYDIS_MNEMONIC_CMOVNZ:
+  case ZYDIS_MNEMONIC_CMOVO:
+  case ZYDIS_MNEMONIC_CMOVP:
+  case ZYDIS_MNEMONIC_CMOVS:
+  case ZYDIS_MNEMONIC_CMOVZ:
+  {
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "if ("));
+
+    switch (pInstruction->mnemonic)
+    {
+    case ZYDIS_MNEMONIC_CMOVB:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "carry_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "carry_flag || zero_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVL:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "sign_flag != overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVLE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "zero_flag || sign_flag != overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNB:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!carry_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!carry_flag && !zero_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNL:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "sign_flag == overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNLE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!zero_flag && sign_flag == overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNO:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNP:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!parity_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!sign_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNZ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!zero_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVO:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVP:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "parity_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "sign_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVZ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "zero_flag"));
+      break;
+    }
+
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ") "));
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress, pInfo));
+
+    switch (pInstruction->mnemonic)
+    {
+    case ZYDIS_MNEMONIC_CMOVB:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if below"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if below or equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVL:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if less"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVLE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if less or equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNB:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if not below"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if not below or equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNL:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if not less"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNLE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if not less or equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVNZ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if not zero / not equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_CMOVZ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if zero / equal"));
+      break;
+
+    default:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ";"));
+      break;
+    }
+
+    return true;
+  }
 
   case ZYDIS_MNEMONIC_LEA:
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
@@ -451,19 +592,147 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_RET:
   {
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "return"));
-
-    if (pInstruction->operand_count > 0)
-    {
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " "));
-      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
-    }
-
     break;
   }
 
   case ZYDIS_MNEMONIC_INT3:
   {
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "__builtin_trap(); // __debugbreak();"));
+    return true;
+  }
+
+  case ZYDIS_MNEMONIC_SETB:
+  case ZYDIS_MNEMONIC_SETBE:
+  case ZYDIS_MNEMONIC_SETL:
+  case ZYDIS_MNEMONIC_SETLE:
+  case ZYDIS_MNEMONIC_SETNB:
+  case ZYDIS_MNEMONIC_SETNBE:
+  case ZYDIS_MNEMONIC_SETNL:
+  case ZYDIS_MNEMONIC_SETNLE:
+  case ZYDIS_MNEMONIC_SETNO:
+  case ZYDIS_MNEMONIC_SETNP:
+  case ZYDIS_MNEMONIC_SETNS:
+  case ZYDIS_MNEMONIC_SETNZ:
+  case ZYDIS_MNEMONIC_SETO:
+  case ZYDIS_MNEMONIC_SETP:
+  case ZYDIS_MNEMONIC_SETS:
+  case ZYDIS_MNEMONIC_SETZ:
+  {
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = ("));
+
+    switch (pInstruction->mnemonic)
+    {
+    case ZYDIS_MNEMONIC_SETB:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "carry_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(carry_flag || zero_flag)"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETL:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "sign_flag != overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETLE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(zero_flag || sign_flag != overflow_flag)"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNB:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!carry_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(!carry_flag && !zero_flag)"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNL:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "sign_flag == overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNLE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(!zero_flag && sign_flag == overflow_flag)"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNO:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNP:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!parity_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!sign_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNZ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "!zero_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETO:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "overflow_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETP:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "parity_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "sign_flag"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETZ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "zero_flag"));
+      break;
+    }
+
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " ? 1 : 0);"));
+
+    switch (pInstruction->mnemonic)
+    {
+    case ZYDIS_MNEMONIC_SETB:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if below"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if below or equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETL:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if less"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETLE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if less or equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNB:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if not below"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNBE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if not below or equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNL:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if not less"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNLE:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if not less or equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETNZ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if not zero / not equal"));
+      break;
+
+    case ZYDIS_MNEMONIC_SETZ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if zero / equal"));
+      break;
+    }
+
     return true;
   }
 
