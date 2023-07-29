@@ -780,6 +780,8 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_MOVAPS:
   case ZYDIS_MNEMONIC_MOVAPD:
   case ZYDIS_MNEMONIC_MOVDQA:
+  case ZYDIS_MNEMONIC_VMOVAPS:
+  case ZYDIS_MNEMONIC_VMOVAPD:
   case ZYDIS_MNEMONIC_VMOVDQA:
   case ZYDIS_MNEMONIC_VMOVDQA32:
   case ZYDIS_MNEMONIC_VMOVDQA64:
@@ -887,6 +889,8 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_MOVSD:
   case ZYDIS_MNEMONIC_MOVDQU:
   case ZYDIS_MNEMONIC_MOVDQ2Q:
+  case ZYDIS_MNEMONIC_VMOVUPS:
+  case ZYDIS_MNEMONIC_VMOVUPD:
   case ZYDIS_MNEMONIC_VMOVQ:
   case ZYDIS_MNEMONIC_VMOVD:
   case ZYDIS_MNEMONIC_VMOVSS:
