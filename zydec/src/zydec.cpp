@@ -2077,6 +2077,52 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_VRANGEPS:
   case ZYDIS_MNEMONIC_VRANGESD:
   case ZYDIS_MNEMONIC_VRANGESS:
+  case ZYDIS_MNEMONIC_VRCPPH:
+  case ZYDIS_MNEMONIC_VRCPSH:
+  case ZYDIS_MNEMONIC_VRCP14PD:
+  case ZYDIS_MNEMONIC_VRCP14PS:
+  case ZYDIS_MNEMONIC_VRCP14SD:
+  case ZYDIS_MNEMONIC_VRCP14SS:
+  case ZYDIS_MNEMONIC_VRCP28PD:
+  case ZYDIS_MNEMONIC_VRCP28PS:
+  case ZYDIS_MNEMONIC_VRCP28SD:
+  case ZYDIS_MNEMONIC_VRCP28SS:
+  case ZYDIS_MNEMONIC_VREDUCEPD:
+  case ZYDIS_MNEMONIC_VREDUCEPS:
+  case ZYDIS_MNEMONIC_VREDUCEPH:
+  case ZYDIS_MNEMONIC_VREDUCESD:
+  case ZYDIS_MNEMONIC_VREDUCESS:
+  case ZYDIS_MNEMONIC_VREDUCESH:
+  case ZYDIS_MNEMONIC_VPROLD:
+  case ZYDIS_MNEMONIC_VPROLQ:
+  case ZYDIS_MNEMONIC_VPROLVD:
+  case ZYDIS_MNEMONIC_VPROLVQ:
+  case ZYDIS_MNEMONIC_VPRORD:
+  case ZYDIS_MNEMONIC_VPRORQ:
+  case ZYDIS_MNEMONIC_VPRORVD:
+  case ZYDIS_MNEMONIC_VPRORVQ:
+  case ZYDIS_MNEMONIC_VRNDSCALEPD:
+  case ZYDIS_MNEMONIC_VRNDSCALEPS:
+  case ZYDIS_MNEMONIC_VRNDSCALEPH:
+  case ZYDIS_MNEMONIC_VRNDSCALESD:
+  case ZYDIS_MNEMONIC_VRNDSCALESS:
+  case ZYDIS_MNEMONIC_VRNDSCALESH:
+  case ZYDIS_MNEMONIC_VRSQRTPH:
+  case ZYDIS_MNEMONIC_VRSQRTSH:
+  case ZYDIS_MNEMONIC_VRSQRT14PD:
+  case ZYDIS_MNEMONIC_VRSQRT14PS:
+  case ZYDIS_MNEMONIC_VRSQRT14SD:
+  case ZYDIS_MNEMONIC_VRSQRT14SS:
+  case ZYDIS_MNEMONIC_VRSQRT28PD:
+  case ZYDIS_MNEMONIC_VRSQRT28PS:
+  case ZYDIS_MNEMONIC_VRSQRT28SD:
+  case ZYDIS_MNEMONIC_VRSQRT28SS:
+  case ZYDIS_MNEMONIC_VSCALEFPD:
+  case ZYDIS_MNEMONIC_VSCALEFPS:
+  case ZYDIS_MNEMONIC_VSCALEFPH:
+  case ZYDIS_MNEMONIC_VSCALEFSD:
+  case ZYDIS_MNEMONIC_VSCALEFSS:
+  case ZYDIS_MNEMONIC_VSCALEFSH:
   {
     if (pInstruction->operand_count > 1)
     {
@@ -4731,6 +4777,190 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
     case ZYDIS_MNEMONIC_VRANGESS:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_range_ss("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCPPH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp_ph("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCPSH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp_sh("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCP14PD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp14_pd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCP14PS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp14_ps("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCP14SD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp14_sd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCP14SS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp14_ss("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCP28PD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp28_pd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCP28PS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp28_ps("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCP28SD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp28_sd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRCP28SS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rcp28_ss("));
+      break;
+
+    case ZYDIS_MNEMONIC_VREDUCEPD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_reduce_pd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VREDUCEPS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_reduce_ps("));
+      break;
+
+    case ZYDIS_MNEMONIC_VREDUCEPH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_reduce_ph("));
+      break;
+
+    case ZYDIS_MNEMONIC_VREDUCESD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_reduce_sd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VREDUCESS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_reduce_ss("));
+      break;
+
+    case ZYDIS_MNEMONIC_VREDUCESH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_reduce_sh("));
+      break;
+
+    case ZYDIS_MNEMONIC_VPROLD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rol_epi32("));
+      break;
+
+    case ZYDIS_MNEMONIC_VPROLQ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rol_epi64("));
+      break;
+      
+    case ZYDIS_MNEMONIC_VPROLVD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rolv_epi32("));
+      break;
+
+    case ZYDIS_MNEMONIC_VPROLVQ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rolv_epi64("));
+      break;
+
+    case ZYDIS_MNEMONIC_VPRORD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_ror_epi32("));
+      break;
+
+    case ZYDIS_MNEMONIC_VPRORQ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_ror_epi64("));
+      break;
+
+    case ZYDIS_MNEMONIC_VPRORVD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rorv_epi32("));
+      break;
+
+    case ZYDIS_MNEMONIC_VPRORVQ:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rorv_epi64("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRNDSCALEPD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_roundscale_pd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRNDSCALEPS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_roundscale_ps("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRNDSCALEPH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_roundscale_ph("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRNDSCALESD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_roundscale_sd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRNDSCALESS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_roundscale_ss("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRNDSCALESH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_roundscale_sh("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRTPH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt_ph("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRTSH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt_sh("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRT14PD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt14_pd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRT14PS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt14_ps("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRT14SD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt14_sd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRT14SS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt14_ss("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRT28PD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt28_pd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRT28PS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt28_ps("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRT28SD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt28_sd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VRSQRT28SS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_rsqrt28_ss("));
+      break;
+
+    case ZYDIS_MNEMONIC_VSCALEFPD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_scalef_pd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VSCALEFPS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_scalef_ps("));
+      break;
+
+    case ZYDIS_MNEMONIC_VSCALEFPH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_scalef_ph("));
+      break;
+
+    case ZYDIS_MNEMONIC_VSCALEFSD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_scalef_sd("));
+      break;
+
+    case ZYDIS_MNEMONIC_VSCALEFSS:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_scalef_ss("));
+      break;
+
+    case ZYDIS_MNEMONIC_VSCALEFSH:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_scalef_sh("));
       break;
 
     default:
