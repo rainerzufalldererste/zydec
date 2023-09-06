@@ -408,6 +408,10 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // if zero / equal"));
     return true;
 
+  case ZYDIS_MNEMONIC_NOP:
+    ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "// nop"));
+    return true;
+
   case ZYDIS_MNEMONIC_ADD:
   case ZYDIS_MNEMONIC_ADC:
   case ZYDIS_MNEMONIC_ADCX:
@@ -432,9 +436,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_SAR:
   case ZYDIS_MNEMONIC_SARX:
   {
-    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
-
-    if (pInstruction->operand_count == 2 && pOperands[0].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[0].reg.value == pOperands[1].reg.value)
+    if (pInstruction->operand_count == 3 /* yes, 3! who knows why. */ && pOperands[0].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[0].reg.value == pOperands[1].reg.value)
     {
       bool match = false;
 
@@ -443,20 +445,21 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       case ZYDIS_MNEMONIC_AND:
       case ZYDIS_MNEMONIC_OR:
         match = true;
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "// nop"));
         break;
 
       case ZYDIS_MNEMONIC_XOR:
+        ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
         ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = 0"));
         match = true;
         break;
       }
 
       if (match)
-      {
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ";"));
         return true;
-      }
     }
+
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
 
     switch (pInstruction->mnemonic)
     {
@@ -966,7 +969,6 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   {
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
-    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress, pInfo));
 
     if (pInstruction->operand_count == 3 && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[2].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].reg.value == pOperands[2].reg.value)
     {
@@ -1000,6 +1002,8 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
         return true;
       }
     }
+
+    ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress, pInfo));
     
     switch (pInstruction->mnemonic)
     {
