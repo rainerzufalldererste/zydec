@@ -49,12 +49,29 @@ struct ZydecFormattingInfo
   ResolveAddressToFriendlyName *pResolveAddressToFriendlyName = nullptr;
   void *pUserData = nullptr;
 
+  typedef bool RegisterAppendStringFunc(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, void *pUserData);
+
+  RegisterAppendStringFunc *pWriteRegister = nullptr;
+  RegisterAppendStringFunc *pWriteResultRegister = nullptr;
+  void *pRegUserData = nullptr;
+
   bool simplifyCommonShorthands = true;
+  bool simplifyValueSelfModification = true;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Currently requires all 10 operands.
 bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation, ZydecFormattingInfo *pInfo);
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct ZydecLinearContext
+{
+  uint32_t regInfo[ZYDIS_REGISTER_MAX_VALUE] = {};
+};
+
+// Currently requires all 10 operands.
+bool zydec_TranslateInstructionWithLinearContext(ZydecLinearContext *pContext, const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation, ZydecFormattingInfo *pInfo);
 
 #endif // zydec_h__

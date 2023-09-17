@@ -67,6 +67,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   bufferPos[0] = '\0';
 
   const bool simplifyShorthands = pInfo == nullptr || pInfo->simplifyCommonShorthands;
+  const bool simplifySelfModification = pInfo == nullptr || pInfo->simplifyValueSelfModification;
 
   switch (pInstruction->mnemonic)
   {
@@ -466,60 +467,124 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
 
-    switch (pInstruction->mnemonic)
+    if (simplifySelfModification)
     {
-    case ZYDIS_MNEMONIC_ADD:
-    case ZYDIS_MNEMONIC_ADC:
-    case ZYDIS_MNEMONIC_ADCX:
-    case ZYDIS_MNEMONIC_ADOX:
-    case ZYDIS_MNEMONIC_FADD:
-    case ZYDIS_MNEMONIC_FADDP:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " += "));
-      break;
+      switch (pInstruction->mnemonic)
+      {
+      case ZYDIS_MNEMONIC_ADD:
+      case ZYDIS_MNEMONIC_ADC:
+      case ZYDIS_MNEMONIC_ADCX:
+      case ZYDIS_MNEMONIC_ADOX:
+      case ZYDIS_MNEMONIC_FADD:
+      case ZYDIS_MNEMONIC_FADDP:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " += "));
+        break;
 
-    case ZYDIS_MNEMONIC_SUB:
-    case ZYDIS_MNEMONIC_FISUB:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " -= "));
-      break;
+      case ZYDIS_MNEMONIC_SUB:
+      case ZYDIS_MNEMONIC_FISUB:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " -= "));
+        break;
 
-    case ZYDIS_MNEMONIC_AND:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " &= "));
-      break;
+      case ZYDIS_MNEMONIC_AND:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " &= "));
+        break;
 
-    case ZYDIS_MNEMONIC_ANDN:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " &= ~"));
-      break;
-    
-    case ZYDIS_MNEMONIC_OR:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " |= "));
-      break;
-    
-    case ZYDIS_MNEMONIC_XOR:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " ^= "));
-      break;
+      case ZYDIS_MNEMONIC_ANDN:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " &= ~"));
+        break;
 
-    case ZYDIS_MNEMONIC_INC:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "++;"));
-      return true;
+      case ZYDIS_MNEMONIC_OR:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " |= "));
+        break;
 
-    case ZYDIS_MNEMONIC_DEC:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "--;"));
-      return true;
+      case ZYDIS_MNEMONIC_XOR:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " ^= "));
+        break;
 
-    case ZYDIS_MNEMONIC_SHL:
-    case ZYDIS_MNEMONIC_SHLX:
-    case ZYDIS_MNEMONIC_SHLD:
-    case ZYDIS_MNEMONIC_SALC:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " << "));
-      break;
+      case ZYDIS_MNEMONIC_INC:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "++;"));
+        return true;
 
-    case ZYDIS_MNEMONIC_SHR:
-    case ZYDIS_MNEMONIC_SHRX:
-    case ZYDIS_MNEMONIC_SHRD:
-    case ZYDIS_MNEMONIC_SAR:
-    case ZYDIS_MNEMONIC_SARX:
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " >> "));
-      break;
+      case ZYDIS_MNEMONIC_DEC:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "--;"));
+        return true;
+
+      case ZYDIS_MNEMONIC_SHL:
+      case ZYDIS_MNEMONIC_SHLX:
+      case ZYDIS_MNEMONIC_SHLD:
+      case ZYDIS_MNEMONIC_SALC:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " <<= "));
+        break;
+
+      case ZYDIS_MNEMONIC_SHR:
+      case ZYDIS_MNEMONIC_SHRX:
+      case ZYDIS_MNEMONIC_SHRD:
+      case ZYDIS_MNEMONIC_SAR:
+      case ZYDIS_MNEMONIC_SARX:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " >>= "));
+        break;
+      }
+    }
+    else
+    {
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
+
+      switch (pInstruction->mnemonic)
+      {
+      case ZYDIS_MNEMONIC_ADD:
+      case ZYDIS_MNEMONIC_ADC:
+      case ZYDIS_MNEMONIC_ADCX:
+      case ZYDIS_MNEMONIC_ADOX:
+      case ZYDIS_MNEMONIC_FADD:
+      case ZYDIS_MNEMONIC_FADDP:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " + "));
+        break;
+
+      case ZYDIS_MNEMONIC_SUB:
+      case ZYDIS_MNEMONIC_FISUB:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " - "));
+        break;
+
+      case ZYDIS_MNEMONIC_AND:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " & "));
+        break;
+
+      case ZYDIS_MNEMONIC_ANDN:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " & ~"));
+        break;
+
+      case ZYDIS_MNEMONIC_OR:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " | "));
+        break;
+
+      case ZYDIS_MNEMONIC_XOR:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " ^ "));
+        break;
+
+      case ZYDIS_MNEMONIC_INC:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "+ 1;"));
+        return true;
+
+      case ZYDIS_MNEMONIC_DEC:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "- 1;"));
+        return true;
+
+      case ZYDIS_MNEMONIC_SHL:
+      case ZYDIS_MNEMONIC_SHLX:
+      case ZYDIS_MNEMONIC_SHLD:
+      case ZYDIS_MNEMONIC_SALC:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " << "));
+        break;
+
+      case ZYDIS_MNEMONIC_SHR:
+      case ZYDIS_MNEMONIC_SHRX:
+      case ZYDIS_MNEMONIC_SHRD:
+      case ZYDIS_MNEMONIC_SAR:
+      case ZYDIS_MNEMONIC_SARX:
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " >> "));
+        break;
+      }
     }
 
     if (pInstruction->operand_count > 1)
