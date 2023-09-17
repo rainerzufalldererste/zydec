@@ -48,6 +48,8 @@ struct ZydecFormattingInfo
 
   ResolveAddressToFriendlyName *pResolveAddressToFriendlyName = nullptr;
   void *pUserData = nullptr;
+
+  bool simplifyCommonShorthands = true;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

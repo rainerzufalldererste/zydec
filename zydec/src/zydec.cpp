@@ -66,6 +66,8 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   *pHasTranslation = true;
   bufferPos[0] = '\0';
 
+  const bool simplifyShorthands = pInfo == nullptr || pInfo->simplifyCommonShorthands;
+
   switch (pInstruction->mnemonic)
   {
   case ZYDIS_MNEMONIC_MOV:
@@ -436,27 +438,30 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_SAR:
   case ZYDIS_MNEMONIC_SARX:
   {
-    if (pInstruction->operand_count == 3 /* yes, 3! who knows why. */ && pOperands[0].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[0].reg.value == pOperands[1].reg.value)
+    if (simplifyShorthands)
     {
-      bool match = false;
-
-      switch (pInstruction->mnemonic)
+      if (pInstruction->operand_count == 3 /* yes, 3! who knows why. */ && pOperands[0].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[0].reg.value == pOperands[1].reg.value)
       {
-      case ZYDIS_MNEMONIC_AND:
-      case ZYDIS_MNEMONIC_OR:
-        match = true;
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "// nop"));
-        break;
+        bool match = false;
 
-      case ZYDIS_MNEMONIC_XOR:
-        ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = 0"));
-        match = true;
-        break;
+        switch (pInstruction->mnemonic)
+        {
+        case ZYDIS_MNEMONIC_AND:
+        case ZYDIS_MNEMONIC_OR:
+          match = true;
+          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "// nop"));
+          break;
+
+        case ZYDIS_MNEMONIC_XOR:
+          ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
+          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = 0"));
+          match = true;
+          break;
+        }
+
+        if (match)
+          return true;
       }
-
-      if (match)
-        return true;
     }
 
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
@@ -970,36 +975,39 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
 
-    if (pInstruction->operand_count == 3 && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[2].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].reg.value == pOperands[2].reg.value)
+    if (simplifyShorthands)
     {
-      bool match = false;
-
-      switch (pInstruction->mnemonic)
+      if (pInstruction->operand_count == 3 && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[2].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].reg.value == pOperands[2].reg.value)
       {
-      case ZYDIS_MNEMONIC_KANDB:
-      case ZYDIS_MNEMONIC_KANDW:
-      case ZYDIS_MNEMONIC_KANDD:
-      case ZYDIS_MNEMONIC_KANDQ:
-      case ZYDIS_MNEMONIC_KORB:
-      case ZYDIS_MNEMONIC_KORW:
-      case ZYDIS_MNEMONIC_KORD:
-      case ZYDIS_MNEMONIC_KORQ:
-        match = true;
-        break;
+        bool match = false;
 
-      case ZYDIS_MNEMONIC_KXORB:
-      case ZYDIS_MNEMONIC_KXORW:
-      case ZYDIS_MNEMONIC_KXORD:
-      case ZYDIS_MNEMONIC_KXORQ:
-        match = true;
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "0"));
-        break;
-      }
+        switch (pInstruction->mnemonic)
+        {
+        case ZYDIS_MNEMONIC_KANDB:
+        case ZYDIS_MNEMONIC_KANDW:
+        case ZYDIS_MNEMONIC_KANDD:
+        case ZYDIS_MNEMONIC_KANDQ:
+        case ZYDIS_MNEMONIC_KORB:
+        case ZYDIS_MNEMONIC_KORW:
+        case ZYDIS_MNEMONIC_KORD:
+        case ZYDIS_MNEMONIC_KORQ:
+          match = true;
+          break;
 
-      if (match)
-      {
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ";"));
-        return true;
+        case ZYDIS_MNEMONIC_KXORB:
+        case ZYDIS_MNEMONIC_KXORW:
+        case ZYDIS_MNEMONIC_KXORD:
+        case ZYDIS_MNEMONIC_KXORQ:
+          match = true;
+          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "0"));
+          break;
+        }
+
+        if (match)
+        {
+          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ";"));
+          return true;
+        }
       }
     }
 
@@ -1084,9 +1092,20 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[operandIndex++], virtualAddress, pInfo, zof_noAddressDeref));
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = _mm_aligned_load"));
     }
-    else
+    else if (pInstruction->operand_count == 2)
     {
       isReg2RegMove = true;
+    }
+    else
+    {
+      ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[operandIndex++], virtualAddress, pInfo, zof_noAddressDeref));
+
+      if (pInstruction->operand_count == 3)
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = _mm_maskz_mov"));
+      else if (pInstruction->operand_count == 4)
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = _mm_mask_mov"));
+      else
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = _mm_mov"));
     }
 
     if (!isReg2RegMove)
@@ -1205,7 +1224,12 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     }
     else
     {
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_move"));
+      if (pInstruction->operand_count == 3)
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = _mm_maskz_mov_unaligned"));
+      else if (pInstruction->operand_count == 4)
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = _mm_mask_mov_unaligned"));
+      else
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = _mm_mov_unaligned"));
     }
 
     if (!isReg2RegMove)
@@ -2233,57 +2257,60 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     bool addressParam = false;
     bool maySelfReference = true;
 
-    if (pInstruction->operand_count == 3 && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[2].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].reg.value == pOperands[2].reg.value)
+    if (simplifyShorthands)
     {
-      bool match = false;
-
-      switch (pInstruction->mnemonic)
+      if (pInstruction->operand_count == 3 && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[2].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].reg.value == pOperands[2].reg.value)
       {
-      case ZYDIS_MNEMONIC_PAND:
-      case ZYDIS_MNEMONIC_VPAND:
-      case ZYDIS_MNEMONIC_VPANDQ:
-      case ZYDIS_MNEMONIC_VPANDD:
-      case ZYDIS_MNEMONIC_POR:
-      case ZYDIS_MNEMONIC_VPOR:
-      case ZYDIS_MNEMONIC_VPORD:
-      case ZYDIS_MNEMONIC_VPORQ:
-      case ZYDIS_MNEMONIC_ORPD:
-      case ZYDIS_MNEMONIC_VORPD:
-      case ZYDIS_MNEMONIC_ORPS:
-      case ZYDIS_MNEMONIC_VORPS:
-        match = true;
-        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, pOperands[1].reg.value));
-        break;
+        bool match = false;
 
-      case ZYDIS_MNEMONIC_PXOR:
-      case ZYDIS_MNEMONIC_VPXOR:
-      case ZYDIS_MNEMONIC_XORPS:
-      case ZYDIS_MNEMONIC_VXORPS:
-      case ZYDIS_MNEMONIC_XORPD:
-      case ZYDIS_MNEMONIC_VXORPD:
-      case ZYDIS_MNEMONIC_VPXORQ:
-      case ZYDIS_MNEMONIC_VPXORD:
-        match = true;
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "0"));
-        break;
+        switch (pInstruction->mnemonic)
+        {
+        case ZYDIS_MNEMONIC_PAND:
+        case ZYDIS_MNEMONIC_VPAND:
+        case ZYDIS_MNEMONIC_VPANDQ:
+        case ZYDIS_MNEMONIC_VPANDD:
+        case ZYDIS_MNEMONIC_POR:
+        case ZYDIS_MNEMONIC_VPOR:
+        case ZYDIS_MNEMONIC_VPORD:
+        case ZYDIS_MNEMONIC_VPORQ:
+        case ZYDIS_MNEMONIC_ORPD:
+        case ZYDIS_MNEMONIC_VORPD:
+        case ZYDIS_MNEMONIC_ORPS:
+        case ZYDIS_MNEMONIC_VORPS:
+          match = true;
+          ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, pOperands[1].reg.value));
+          break;
 
-      case ZYDIS_MNEMONIC_PCMPEQB:
-      case ZYDIS_MNEMONIC_VPCMPEQB:
-      case ZYDIS_MNEMONIC_PCMPEQW:
-      case ZYDIS_MNEMONIC_VPCMPEQW:
-      case ZYDIS_MNEMONIC_PCMPEQD:
-      case ZYDIS_MNEMONIC_VPCMPEQD:
-      case ZYDIS_MNEMONIC_PCMPEQQ:
-      case ZYDIS_MNEMONIC_VPCMPEQQ:
-        match = true;
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "-1"));
-        break;
-      }
+        case ZYDIS_MNEMONIC_PXOR:
+        case ZYDIS_MNEMONIC_VPXOR:
+        case ZYDIS_MNEMONIC_XORPS:
+        case ZYDIS_MNEMONIC_VXORPS:
+        case ZYDIS_MNEMONIC_XORPD:
+        case ZYDIS_MNEMONIC_VXORPD:
+        case ZYDIS_MNEMONIC_VPXORQ:
+        case ZYDIS_MNEMONIC_VPXORD:
+          match = true;
+          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "0"));
+          break;
 
-      if (match)
-      {
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ";"));
-        return true;
+        case ZYDIS_MNEMONIC_PCMPEQB:
+        case ZYDIS_MNEMONIC_VPCMPEQB:
+        case ZYDIS_MNEMONIC_PCMPEQW:
+        case ZYDIS_MNEMONIC_VPCMPEQW:
+        case ZYDIS_MNEMONIC_PCMPEQD:
+        case ZYDIS_MNEMONIC_VPCMPEQD:
+        case ZYDIS_MNEMONIC_PCMPEQQ:
+        case ZYDIS_MNEMONIC_VPCMPEQQ:
+          match = true;
+          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "-1"));
+          break;
+        }
+
+        if (match)
+        {
+          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ";"));
+          return true;
+        }
       }
     }
 
@@ -5886,13 +5913,10 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
       {
         ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base));
 
-        if (pOperand->mem.disp.has_displacement)
+        if (pOperand->mem.disp.has_displacement && pOperand->mem.disp.value != 0)
         {
-          if (pOperand->mem.disp.value != 0)
-          {
-            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
-            ERROR_CHECK(zydec_WriteInt(pBufferPos, pRemainingSize, pOperand->mem.disp.value));
-          }
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
+          ERROR_CHECK(zydec_WriteInt(pBufferPos, pRemainingSize, pOperand->mem.disp.value));
         }
         else if (pOperand->mem.index != ZYDIS_REGISTER_NONE)
         {
