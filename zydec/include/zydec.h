@@ -51,17 +51,17 @@ struct ZydecFormattingInfo
 
   typedef bool RegisterAppendStringFunc(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, void *pUserData);
 
-  RegisterAppendStringFunc *pWriteRegister = nullptr;
-  RegisterAppendStringFunc *pWriteResultRegister = nullptr;
-  void *pRegUserData = nullptr;
+  RegisterAppendStringFunc *pWriteRegister = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  RegisterAppendStringFunc *pWriteResultRegister = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  void *pRegUserData = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
 
   typedef void AfterCallFunc(void *pUserData);
 
-  AfterCallFunc *pAfterCall = nullptr;
-  void *pCallUserData = nullptr;
+  AfterCallFunc *pAfterCall = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  void *pCallUserData = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
 
   bool simplifyCommonShorthands = true;
-  bool simplifyValueSelfModification = true;
+  bool simplifyValueSelfModification = true; // only available with `zydec_TranslateInstructionWithoutContext`.
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,6 +73,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
 struct ZydecLinearContext
 {
+  uint32_t hashState = 0x4CA7F00D;
   uint32_t regInfo[ZYDIS_REGISTER_MAX_VALUE] = {};
 };
 
