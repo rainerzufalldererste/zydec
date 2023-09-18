@@ -5826,215 +5826,215 @@ static const char RegisterNameLut[][32] = {
     "",
 
     // General purpose registers  8-bit
-    "(i8)a",
-    "(i8)c",
-    "(i8)d",
-    "(i8)b",
-    "(i8)(a >> 8)",
-    "(i8)(c >> 8)",
-    "(i8)(d >> 8)",
-    "(i8)(b >> 8)",
-    "(i8)stack_pointer",
-    "(i8)bp",
-    "(i8)si",
-    "(i8)di",
-    "(i8)r8",
-    "(i8)r9",
-    "(i8)r10",
-    "(i8)r11",
-    "(i8)r12",
-    "(i8)r13",
-    "(i8)r14",
-    "(i8)r15",
+    "al",
+    "cl",
+    "dl",
+    "bl",
+    "ah",
+    "ch",
+    "dh",
+    "bh",
+    "spl",
+    "bpl",
+    "sil",
+    "dil",
+    "r8b",
+    "r9b",
+    "r10b",
+    "r11b",
+    "r12b",
+    "r13b",
+    "r14b",
+    "r15b",
 
     // General purpose registers 16-bit
-    "(i16)a",
-    "(i16)c",
-    "(i16)d",
-    "(i16)b",
-    "(i16)stack_pointer",
-    "(i16)bp",
-    "(i16)si",
-    "(i16)di",
-    "(i16)r8",
-    "(i16)r9",
-    "(i16)r10",
-    "(i16)r11",
-    "(i16)r12",
-    "(i16)r13",
-    "(i16)r14",
-    "(i16)r15",
+    "ax",
+    "cx",
+    "dx",
+    "bx",
+    "sp",
+    "bp",
+    "si",
+    "di",
+    "r8w",
+    "r9w",
+    "r10w",
+    "r11w",
+    "r12w",
+    "r13w",
+    "r14w",
+    "r15w",
 
     // General purpose registers 32-bit
-    "(i32)a",
-    "(i32)c",
-    "(i32)d",
-    "(i32)b",
-    "(i32)stack_pointer",
-    "(i32)bp",
-    "(i32)si",
-    "(i32)di",
-    "(i32)r8",
-    "(i32)r9",
-    "(i32)r10",
-    "(i32)r11",
-    "(i32)r12",
-    "(i32)r13",
-    "(i32)r14",
-    "(i32)r15",
+    "eax",
+    "ecx",
+    "edx",
+    "ebx",
+    "esp",
+    "ebp",
+    "esi",
+    "edi",
+    "r8d",
+    "r9d",
+    "r10d",
+    "r11d",
+    "r12d",
+    "r13d",
+    "r14d",
+    "r15d",
 
     // General purpose registers 64-bit
-    "(i64)a",
-    "(i64)c",
-    "(i64)d",
-    "(i64)b",
-    "(i64)stack_pointer",
-    "(i64)bp",
-    "(i64)si",
-    "(i64)di",
-    "(i64)r8",
-    "(i64)r9",
-    "(i64)r10",
-    "(i64)r11",
-    "(i64)r12",
-    "(i64)r13",
-    "(i64)r14",
-    "(i64)r15",
+    "a",
+    "c",
+    "d",
+    "b",
+    "stack_pointer",
+    "bp",
+    "si",
+    "di",
+    "r8",
+    "r9",
+    "r10",
+    "r11",
+    "r12",
+    "r13",
+    "r14",
+    "r15",
 
     // Floating point legacy registers
-    "(float)s0",
-    "(float)s1",
-    "(float)s2",
-    "(float)s3",
-    "(float)s4",
-    "(float)s5",
-    "(float)s6",
-    "(float)s7",
+    "s0",
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7",
     "x87control",
     "x87status",
     "x87tag",
 
     // Floating point multimedia registers
-    "(float)mm0",
-    "(float)mm1",
-    "(float)mm2",
-    "(float)mm3",
-    "(float)mm4",
-    "(float)mm5",
-    "(float)mm6",
-    "(float)mm7",
+    "mm0",
+    "mm1",
+    "mm2",
+    "mm3",
+    "mm4",
+    "mm5",
+    "mm6",
+    "mm7",
 
     // Floating point vector registers 128-bit
-    "(m128)x0",
-    "(m128)x1",
-    "(m128)x2",
-    "(m128)x3",
-    "(m128)x4",
-    "(m128)x5",
-    "(m128)x6",
-    "(m128)x7",
-    "(m128)x8",
-    "(m128)x9",
-    "(m128)x10",
-    "(m128)x11",
-    "(m128)x12",
-    "(m128)x13",
-    "(m128)x14",
-    "(m128)x15",
-    "(m128)x16",
-    "(m128)x17",
-    "(m128)x18",
-    "(m128)x19",
-    "(m128)x20",
-    "(m128)x21",
-    "(m128)x22",
-    "(m128)x23",
-    "(m128)x24",
-    "(m128)x25",
-    "(m128)x26",
-    "(m128)x27",
-    "(m128)x28",
-    "(m128)x29",
-    "(m128)x30",
-    "(m128)x31",
+    "x0",
+    "x1",
+    "x2",
+    "x3",
+    "x4",
+    "x5",
+    "x6",
+    "x7",
+    "x8",
+    "x9",
+    "x10",
+    "x11",
+    "x12",
+    "x13",
+    "x14",
+    "x15",
+    "x16",
+    "x17",
+    "x18",
+    "x19",
+    "x20",
+    "x21",
+    "x22",
+    "x23",
+    "x24",
+    "x25",
+    "x26",
+    "x27",
+    "x28",
+    "x29",
+    "x30",
+    "x31",
 
     // Floating point vector registers 256-bit
-    "(m256)y0",
-    "(m256)y1",
-    "(m256)y2",
-    "(m256)y3",
-    "(m256)y4",
-    "(m256)y5",
-    "(m256)y6",
-    "(m256)y7",
-    "(m256)y8",
-    "(m256)y9",
-    "(m256)y10",
-    "(m256)y11",
-    "(m256)y12",
-    "(m256)y13",
-    "(m256)y14",
-    "(m256)y15",
-    "(m256)y16",
-    "(m256)y17",
-    "(m256)y18",
-    "(m256)y19",
-    "(m256)y20",
-    "(m256)y21",
-    "(m256)y22",
-    "(m256)y23",
-    "(m256)y24",
-    "(m256)y25",
-    "(m256)y26",
-    "(m256)y27",
-    "(m256)y28",
-    "(m256)y29",
-    "(m256)y30",
-    "(m256)y31",
+    "y0",
+    "y1",
+    "y2",
+    "y3",
+    "y4",
+    "y5",
+    "y6",
+    "y7",
+    "y8",
+    "y9",
+    "y10",
+    "y11",
+    "y12",
+    "y13",
+    "y14",
+    "y15",
+    "y16",
+    "y17",
+    "y18",
+    "y19",
+    "y20",
+    "y21",
+    "y22",
+    "y23",
+    "y24",
+    "y25",
+    "y26",
+    "y27",
+    "y28",
+    "y29",
+    "y30",
+    "y31",
 
     // Floating point vector registers 512-bit
-    "(m512)z0",
-    "(m512)z1",
-    "(m512)z2",
-    "(m512)z3",
-    "(m512)z4",
-    "(m512)z5",
-    "(m512)z6",
-    "(m512)z7",
-    "(m512)z8",
-    "(m512)z9",
-    "(m512)z10",
-    "(m512)z11",
-    "(m512)z12",
-    "(m512)z13",
-    "(m512)z14",
-    "(m512)z15",
-    "(m512)z16",
-    "(m512)z17",
-    "(m512)z18",
-    "(m512)z19",
-    "(m512)z20",
-    "(m512)z21",
-    "(m512)z22",
-    "(m512)z23",
-    "(m512)z24",
-    "(m512)z25",
-    "(m512)z26",
-    "(m512)z27",
-    "(m512)z28",
-    "(m512)z29",
-    "(m512)z30",
-    "(m512)z31",
+    "z0",
+    "z1",
+    "z2",
+    "z3",
+    "z4",
+    "z5",
+    "z6",
+    "z7",
+    "z8",
+    "z9",
+    "z10",
+    "z11",
+    "z12",
+    "z13",
+    "z14",
+    "z15",
+    "z16",
+    "z17",
+    "z18",
+    "z19",
+    "z20",
+    "z21",
+    "z22",
+    "z23",
+    "z24",
+    "z25",
+    "z26",
+    "z27",
+    "z28",
+    "z29",
+    "z30",
+    "z31",
 
     // Matrix registers
-    "(matrix_tile)t0",
-    "(matrix_tile)t1",
-    "(matrix_tile)t2",
-    "(matrix_tile)t3",
-    "(matrix_tile)t4",
-    "(matrix_tile)t5",
-    "(matrix_tile)t6",
-    "(matrix_tile)t7",
+    "t0",
+    "t1",
+    "t2",
+    "t3",
+    "t4",
+    "t5",
+    "t6",
+    "t7",
 
     // Flags registers
     "flags",
@@ -6042,9 +6042,9 @@ static const char RegisterNameLut[][32] = {
     "rflags",
 
     // Instruction-pointer registers
-    "(i16)instruction_pointer",
-    "(i32)instruction_pointer",
-    "(i64)instruction_pointer",
+    "ip",
+    "eip",
+    "instruction_pointer",
 
     // Segment registers
     "extra_segment",
@@ -6130,6 +6130,367 @@ static const char RegisterNameLut[][32] = {
     "xcr0",
     "uif",
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+const char *zydec_ResolveRegisterPrefix(const ZydisRegister reg)
+{
+  switch (reg)
+  {
+  case ZYDIS_REGISTER_AL:
+  case ZYDIS_REGISTER_CL:
+  case ZYDIS_REGISTER_DL:
+  case ZYDIS_REGISTER_BL:
+  case ZYDIS_REGISTER_SPL:
+  case ZYDIS_REGISTER_BPL:
+  case ZYDIS_REGISTER_SIL:
+  case ZYDIS_REGISTER_DIL:
+  case ZYDIS_REGISTER_R8B:
+  case ZYDIS_REGISTER_R9B:
+  case ZYDIS_REGISTER_R10B:
+  case ZYDIS_REGISTER_R11B:
+  case ZYDIS_REGISTER_R12B:
+  case ZYDIS_REGISTER_R13B:
+  case ZYDIS_REGISTER_R14B:
+  case ZYDIS_REGISTER_R15B:
+    return "(i8)";
+
+  case ZYDIS_REGISTER_AH:
+  case ZYDIS_REGISTER_CH:
+  case ZYDIS_REGISTER_DH:
+  case ZYDIS_REGISTER_BH:
+    return "(i8)(";
+
+  case ZYDIS_REGISTER_AX:
+  case ZYDIS_REGISTER_CX:
+  case ZYDIS_REGISTER_DX:
+  case ZYDIS_REGISTER_BX:
+  case ZYDIS_REGISTER_SP:
+  case ZYDIS_REGISTER_BP:
+  case ZYDIS_REGISTER_SI:
+  case ZYDIS_REGISTER_DI:
+  case ZYDIS_REGISTER_R8W:
+  case ZYDIS_REGISTER_R9W:
+  case ZYDIS_REGISTER_R10W:
+  case ZYDIS_REGISTER_R11W:
+  case ZYDIS_REGISTER_R12W:
+  case ZYDIS_REGISTER_R13W:
+  case ZYDIS_REGISTER_R14W:
+  case ZYDIS_REGISTER_R15W:
+  case ZYDIS_REGISTER_FLAGS:
+  case ZYDIS_REGISTER_IP:
+    return "(i16)";
+
+  case ZYDIS_REGISTER_EAX:
+  case ZYDIS_REGISTER_ECX:
+  case ZYDIS_REGISTER_EDX:
+  case ZYDIS_REGISTER_EBX:
+  case ZYDIS_REGISTER_ESP:
+  case ZYDIS_REGISTER_EBP:
+  case ZYDIS_REGISTER_ESI:
+  case ZYDIS_REGISTER_EDI:
+  case ZYDIS_REGISTER_R8D:
+  case ZYDIS_REGISTER_R9D:
+  case ZYDIS_REGISTER_R10D:
+  case ZYDIS_REGISTER_R11D:
+  case ZYDIS_REGISTER_R12D:
+  case ZYDIS_REGISTER_R13D:
+  case ZYDIS_REGISTER_R14D:
+  case ZYDIS_REGISTER_R15D:
+  case ZYDIS_REGISTER_EFLAGS:
+  case ZYDIS_REGISTER_EIP:
+    return "(i32)";
+
+  case ZYDIS_REGISTER_RAX:
+  case ZYDIS_REGISTER_RCX:
+  case ZYDIS_REGISTER_RDX:
+  case ZYDIS_REGISTER_RBX:
+  case ZYDIS_REGISTER_RSP:
+  case ZYDIS_REGISTER_RBP:
+  case ZYDIS_REGISTER_RSI:
+  case ZYDIS_REGISTER_RDI:
+  case ZYDIS_REGISTER_R8:
+  case ZYDIS_REGISTER_R9:
+  case ZYDIS_REGISTER_R10:
+  case ZYDIS_REGISTER_R11:
+  case ZYDIS_REGISTER_R12:
+  case ZYDIS_REGISTER_R13:
+  case ZYDIS_REGISTER_R14:
+  case ZYDIS_REGISTER_R15:
+  case ZYDIS_REGISTER_RFLAGS:
+  case ZYDIS_REGISTER_RIP:
+    return "(i64)";
+
+  case ZYDIS_REGISTER_ST0:
+  case ZYDIS_REGISTER_ST1:
+  case ZYDIS_REGISTER_ST2:
+  case ZYDIS_REGISTER_ST3:
+  case ZYDIS_REGISTER_ST4:
+  case ZYDIS_REGISTER_ST5:
+  case ZYDIS_REGISTER_ST6:
+  case ZYDIS_REGISTER_ST7:
+  case ZYDIS_REGISTER_MM0:
+  case ZYDIS_REGISTER_MM1:
+  case ZYDIS_REGISTER_MM2:
+  case ZYDIS_REGISTER_MM3:
+  case ZYDIS_REGISTER_MM4:
+  case ZYDIS_REGISTER_MM5:
+  case ZYDIS_REGISTER_MM6:
+  case ZYDIS_REGISTER_MM7:
+    return "(float)";
+
+  case ZYDIS_REGISTER_XMM0:
+  case ZYDIS_REGISTER_XMM1:
+  case ZYDIS_REGISTER_XMM2:
+  case ZYDIS_REGISTER_XMM3:
+  case ZYDIS_REGISTER_XMM4:
+  case ZYDIS_REGISTER_XMM5:
+  case ZYDIS_REGISTER_XMM6:
+  case ZYDIS_REGISTER_XMM7:
+  case ZYDIS_REGISTER_XMM8:
+  case ZYDIS_REGISTER_XMM9:
+  case ZYDIS_REGISTER_XMM10:
+  case ZYDIS_REGISTER_XMM11:
+  case ZYDIS_REGISTER_XMM12:
+  case ZYDIS_REGISTER_XMM13:
+  case ZYDIS_REGISTER_XMM14:
+  case ZYDIS_REGISTER_XMM15:
+  case ZYDIS_REGISTER_XMM16:
+  case ZYDIS_REGISTER_XMM17:
+  case ZYDIS_REGISTER_XMM18:
+  case ZYDIS_REGISTER_XMM19:
+  case ZYDIS_REGISTER_XMM20:
+  case ZYDIS_REGISTER_XMM21:
+  case ZYDIS_REGISTER_XMM22:
+  case ZYDIS_REGISTER_XMM23:
+  case ZYDIS_REGISTER_XMM24:
+  case ZYDIS_REGISTER_XMM25:
+  case ZYDIS_REGISTER_XMM26:
+  case ZYDIS_REGISTER_XMM27:
+  case ZYDIS_REGISTER_XMM28:
+  case ZYDIS_REGISTER_XMM29:
+  case ZYDIS_REGISTER_XMM30:
+  case ZYDIS_REGISTER_XMM31:
+    return "(m128)";
+
+  case ZYDIS_REGISTER_YMM0:
+  case ZYDIS_REGISTER_YMM1:
+  case ZYDIS_REGISTER_YMM2:
+  case ZYDIS_REGISTER_YMM3:
+  case ZYDIS_REGISTER_YMM4:
+  case ZYDIS_REGISTER_YMM5:
+  case ZYDIS_REGISTER_YMM6:
+  case ZYDIS_REGISTER_YMM7:
+  case ZYDIS_REGISTER_YMM8:
+  case ZYDIS_REGISTER_YMM9:
+  case ZYDIS_REGISTER_YMM10:
+  case ZYDIS_REGISTER_YMM11:
+  case ZYDIS_REGISTER_YMM12:
+  case ZYDIS_REGISTER_YMM13:
+  case ZYDIS_REGISTER_YMM14:
+  case ZYDIS_REGISTER_YMM15:
+  case ZYDIS_REGISTER_YMM16:
+  case ZYDIS_REGISTER_YMM17:
+  case ZYDIS_REGISTER_YMM18:
+  case ZYDIS_REGISTER_YMM19:
+  case ZYDIS_REGISTER_YMM20:
+  case ZYDIS_REGISTER_YMM21:
+  case ZYDIS_REGISTER_YMM22:
+  case ZYDIS_REGISTER_YMM23:
+  case ZYDIS_REGISTER_YMM24:
+  case ZYDIS_REGISTER_YMM25:
+  case ZYDIS_REGISTER_YMM26:
+  case ZYDIS_REGISTER_YMM27:
+  case ZYDIS_REGISTER_YMM28:
+  case ZYDIS_REGISTER_YMM29:
+  case ZYDIS_REGISTER_YMM30:
+  case ZYDIS_REGISTER_YMM31:
+    return "(m256)";
+
+  case ZYDIS_REGISTER_ZMM0:
+  case ZYDIS_REGISTER_ZMM1:
+  case ZYDIS_REGISTER_ZMM2:
+  case ZYDIS_REGISTER_ZMM3:
+  case ZYDIS_REGISTER_ZMM4:
+  case ZYDIS_REGISTER_ZMM5:
+  case ZYDIS_REGISTER_ZMM6:
+  case ZYDIS_REGISTER_ZMM7:
+  case ZYDIS_REGISTER_ZMM8:
+  case ZYDIS_REGISTER_ZMM9:
+  case ZYDIS_REGISTER_ZMM10:
+  case ZYDIS_REGISTER_ZMM11:
+  case ZYDIS_REGISTER_ZMM12:
+  case ZYDIS_REGISTER_ZMM13:
+  case ZYDIS_REGISTER_ZMM14:
+  case ZYDIS_REGISTER_ZMM15:
+  case ZYDIS_REGISTER_ZMM16:
+  case ZYDIS_REGISTER_ZMM17:
+  case ZYDIS_REGISTER_ZMM18:
+  case ZYDIS_REGISTER_ZMM19:
+  case ZYDIS_REGISTER_ZMM20:
+  case ZYDIS_REGISTER_ZMM21:
+  case ZYDIS_REGISTER_ZMM22:
+  case ZYDIS_REGISTER_ZMM23:
+  case ZYDIS_REGISTER_ZMM24:
+  case ZYDIS_REGISTER_ZMM25:
+  case ZYDIS_REGISTER_ZMM26:
+  case ZYDIS_REGISTER_ZMM27:
+  case ZYDIS_REGISTER_ZMM28:
+  case ZYDIS_REGISTER_ZMM29:
+  case ZYDIS_REGISTER_ZMM30:
+  case ZYDIS_REGISTER_ZMM31:
+    return "(m512)";
+
+  case ZYDIS_REGISTER_TMM0:
+  case ZYDIS_REGISTER_TMM1:
+  case ZYDIS_REGISTER_TMM2:
+  case ZYDIS_REGISTER_TMM3:
+  case ZYDIS_REGISTER_TMM4:
+  case ZYDIS_REGISTER_TMM5:
+  case ZYDIS_REGISTER_TMM6:
+  case ZYDIS_REGISTER_TMM7:
+    return "(matrix_tile)";
+
+  default:
+    return nullptr;
+  }
+}
+
+const char *zydec_ResolveRegisterPostfix(const ZydisRegister reg)
+{
+  switch (reg)
+  {
+  case ZYDIS_REGISTER_AH:
+  case ZYDIS_REGISTER_CH:
+  case ZYDIS_REGISTER_DH:
+  case ZYDIS_REGISTER_BH:
+    return " >> 8)";
+
+  default:
+    return nullptr;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+ZydisRegister zydec_ResolveBaseRegister(const ZydisRegister reg)
+{
+  switch (reg)
+  {
+  case ZYDIS_REGISTER_AL:
+  case ZYDIS_REGISTER_AH:
+  case ZYDIS_REGISTER_AX:
+  case ZYDIS_REGISTER_EAX:
+  case ZYDIS_REGISTER_RAX:
+    return ZYDIS_REGISTER_RAX;
+
+  case ZYDIS_REGISTER_CL:
+  case ZYDIS_REGISTER_CH:
+  case ZYDIS_REGISTER_CX:
+  case ZYDIS_REGISTER_ECX:
+  case ZYDIS_REGISTER_RCX:
+    return ZYDIS_REGISTER_RCX;
+
+  case ZYDIS_REGISTER_DL:
+  case ZYDIS_REGISTER_DH:
+  case ZYDIS_REGISTER_DX:
+  case ZYDIS_REGISTER_EDX:
+  case ZYDIS_REGISTER_RDX:
+    return ZYDIS_REGISTER_RDX;
+
+  case ZYDIS_REGISTER_BL:
+  case ZYDIS_REGISTER_BH:
+  case ZYDIS_REGISTER_BX:
+  case ZYDIS_REGISTER_EBX:
+  case ZYDIS_REGISTER_RBX:
+    return ZYDIS_REGISTER_RBX;
+
+  case ZYDIS_REGISTER_SPL:
+  case ZYDIS_REGISTER_SP:
+  case ZYDIS_REGISTER_ESP:
+  case ZYDIS_REGISTER_RSP:
+    return ZYDIS_REGISTER_RSP;
+
+  case ZYDIS_REGISTER_BPL:
+  case ZYDIS_REGISTER_BP:
+  case ZYDIS_REGISTER_EBP:
+  case ZYDIS_REGISTER_RBP:
+    return ZYDIS_REGISTER_RBP;
+
+  case ZYDIS_REGISTER_SIL:
+  case ZYDIS_REGISTER_SI:
+  case ZYDIS_REGISTER_ESI:
+  case ZYDIS_REGISTER_RSI:
+    return ZYDIS_REGISTER_RSI;
+
+  case ZYDIS_REGISTER_DIL:
+  case ZYDIS_REGISTER_DI:
+  case ZYDIS_REGISTER_EDI:
+  case ZYDIS_REGISTER_RDI:
+    return ZYDIS_REGISTER_RDI;
+
+  case ZYDIS_REGISTER_R8B:
+  case ZYDIS_REGISTER_R8W:
+  case ZYDIS_REGISTER_R8D:
+  case ZYDIS_REGISTER_R8:
+    return ZYDIS_REGISTER_R8;
+
+  case ZYDIS_REGISTER_R9B:
+  case ZYDIS_REGISTER_R9W:
+  case ZYDIS_REGISTER_R9D:
+  case ZYDIS_REGISTER_R9:
+    return ZYDIS_REGISTER_R9;
+
+  case ZYDIS_REGISTER_R10B:
+  case ZYDIS_REGISTER_R10W:
+  case ZYDIS_REGISTER_R10D:
+  case ZYDIS_REGISTER_R10:
+    return ZYDIS_REGISTER_R10;
+
+  case ZYDIS_REGISTER_R11B:
+  case ZYDIS_REGISTER_R11W:
+  case ZYDIS_REGISTER_R11D:
+  case ZYDIS_REGISTER_R11:
+    return ZYDIS_REGISTER_R11;
+
+  case ZYDIS_REGISTER_R12B:
+  case ZYDIS_REGISTER_R12W:
+  case ZYDIS_REGISTER_R12D:
+  case ZYDIS_REGISTER_R12:
+    return ZYDIS_REGISTER_R12;
+
+  case ZYDIS_REGISTER_R13B:
+  case ZYDIS_REGISTER_R13W:
+  case ZYDIS_REGISTER_R13D:
+  case ZYDIS_REGISTER_R13:
+    return ZYDIS_REGISTER_R13;
+
+  case ZYDIS_REGISTER_R14B:
+  case ZYDIS_REGISTER_R14W:
+  case ZYDIS_REGISTER_R14D:
+  case ZYDIS_REGISTER_R14:
+    return ZYDIS_REGISTER_R14;
+
+  case ZYDIS_REGISTER_R15B:
+  case ZYDIS_REGISTER_R15W:
+  case ZYDIS_REGISTER_R15D:
+  case ZYDIS_REGISTER_R15:
+    return ZYDIS_REGISTER_R15;
+
+  case ZYDIS_REGISTER_FLAGS:
+  case ZYDIS_REGISTER_EFLAGS:
+  case ZYDIS_REGISTER_RFLAGS:
+    return ZYDIS_REGISTER_RFLAGS;
+
+  case ZYDIS_REGISTER_IP:
+  case ZYDIS_REGISTER_EIP:
+  case ZYDIS_REGISTER_RIP:
+    return ZYDIS_REGISTER_RIP;
+
+  default:
+    return reg;
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -6412,13 +6773,32 @@ bool zydec_WriteRegisterRaw(char **pBufferPos, size_t *pRemainingSize, const Zyd
 
 bool zydec_WriteRegister(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, ZydecFormattingInfo *pInfo, const bool isNewResult)
 {
+  const char *pre = zydec_ResolveRegisterPrefix(reg);
+  const char *post = zydec_ResolveRegisterPostfix(reg);
+  const ZydisRegister baseReg = zydec_ResolveBaseRegister(reg);
+
+  if (pre != nullptr && !zydec_WriteRaw(pBufferPos, pRemainingSize, pre))
+    return false;
+
   if (pInfo == nullptr || (isNewResult && pInfo->pWriteResultRegister == nullptr) || (!isNewResult && pInfo->pWriteRegister == nullptr))
-    return zydec_WriteRegisterRaw(pBufferPos, pRemainingSize, reg);
+    if (!zydec_WriteRegisterRaw(pBufferPos, pRemainingSize, baseReg))
+      return false;
 
   if (isNewResult)
-    return pInfo->pWriteResultRegister(pBufferPos, pRemainingSize, reg, pInfo->pRegUserData);
+  {
+    if (!pInfo->pWriteResultRegister(pBufferPos, pRemainingSize, baseReg, pInfo->pRegUserData))
+      return false;
+  }
   else
-    return pInfo->pWriteRegister(pBufferPos, pRemainingSize, reg, pInfo->pRegUserData);
+  {
+    if (!pInfo->pWriteRegister(pBufferPos, pRemainingSize, baseReg, pInfo->pRegUserData))
+      return false;
+  }
+
+  if (post != nullptr && !zydec_WriteRaw(pBufferPos, pRemainingSize, post))
+    return false;
+
+  return true;
 }
 
 bool zydec_WriteRaw(char **pBufferPos, size_t *pRemainingSize, const char *text)

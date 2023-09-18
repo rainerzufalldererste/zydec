@@ -70,9 +70,9 @@ struct ZydecFormattingInfo
 
     Default = 
 #if defined(_WIN32) || defined(_WIN64)
-    Windows
+      Windows
 #else
-    Linux
+      Linux
 #endif
   };
   
