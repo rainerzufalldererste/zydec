@@ -620,20 +620,60 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     if (pInstruction->operand_count == 1)
     {
       if (pOperands[0].element_size < 16)
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(i16)a = (i8)a * "));
+      {
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AX, pInfo, true));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AL, pInfo, false));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " * "));
+      }
       else if (pOperands[0].element_size < 32)
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "[(i16)d, (i64)a] = (i16)a * "));
+      {
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "["));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_DX, pInfo, true));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ", "));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AX, pInfo, true));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "] = "));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AX, pInfo, false));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " * "));
+      }
       else if (pOperands[0].element_size < 64)
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "[(i32)d, (i32)a] = (i32)a * "));
+      {
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "["));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_EDX, pInfo, true));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ", "));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_EAX, pInfo, true));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "] = "));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_EAX, pInfo, false));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " * "));
+      }
       else
-        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "[(i64)d, (i64)a] = (i64)a * "));
+      {
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "["));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_RDX, pInfo, true));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ", "));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_RAX, pInfo, true));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "] = "));
+        ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_RAX, pInfo, false));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " * "));
+      }
 
       ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
     }
     else if (pInstruction->operand_count == 2)
     {
       ERROR_CHECK(zydec_WriteResultOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " *= "));
+      
+      if (simplifySelfModification)
+      {
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " *= "));
+      }
+      else
+      {
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+        ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " * "));
+      }
+
       ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress, pInfo));
     }
     else
@@ -660,24 +700,68 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_IDIV:
   {
     if (pOperands[0].element_size < 16)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(i8)a = (i16)a / "));
+    {
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AL, pInfo, true));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AX, pInfo, false));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " / "));
+    }
     else if (pOperands[0].element_size < 32)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(i16)a = (i16)a / "));
+    {
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AX, pInfo, true));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AX, pInfo, false));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " / "));
+    }
     else if (pOperands[0].element_size < 64)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(i32)a = (i32)a / "));
+    {
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_EAX, pInfo, true));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_EAX, pInfo, false));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " / "));
+    }
     else
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "(i64)a = (i64)a / "));
+    {
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_RAX, pInfo, true));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_RAX, pInfo, false));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " / "));
+    }
 
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
 
     if (pOperands[0].element_size < 16)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; (i8)(a >> 8) = (i16)a % "));
+    {
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AH, pInfo, true));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AX, pInfo, false));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " % "));
+    }
     else if (pOperands[0].element_size < 32)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; (i16)d = (i16)a % "));
+    {
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_DX, pInfo, true));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_AX, pInfo, false));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " % "));
+    }
     else if (pOperands[0].element_size < 64)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; (i32)d = (i32)a % "));
+    {
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_EDX, pInfo, true));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_EAX, pInfo, false));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " % "));
+    }
     else
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; (i64)d = (i64)a % "));
+    {
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_RDX, pInfo, true));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = "));
+      ERROR_CHECK(zydec_WriteRegister(&bufferPos, &remainingSize, ZYDIS_REGISTER_RAX, pInfo, false));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " % "));
+    }
 
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
 
