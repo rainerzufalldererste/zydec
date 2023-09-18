@@ -5640,6 +5640,42 @@ struct ZydecLinearContextFormatInfo
   uint32_t assignedRegisterValue[8];
 };
 
+void zydec_LinearContext_AfterCall(void *pUserData)
+{
+  ZydecLinearContextFormatInfo *pInfo = static_cast<ZydecLinearContextFormatInfo *>(pUserData);
+
+  for (size_t i = 0; i < ZYDIS_REGISTER_MAX_VALUE; i++)
+  {
+    switch (i)
+    {
+    case ZYDIS_REGISTER_RBX:
+    case ZYDIS_REGISTER_RBP:
+    case ZYDIS_REGISTER_RDI:
+    case ZYDIS_REGISTER_RSI:
+    case ZYDIS_REGISTER_RSP:
+    case ZYDIS_REGISTER_R12:
+    case ZYDIS_REGISTER_R13:
+    case ZYDIS_REGISTER_R14:
+    case ZYDIS_REGISTER_R15:
+    case ZYDIS_REGISTER_XMM6:
+    case ZYDIS_REGISTER_XMM7:
+    case ZYDIS_REGISTER_XMM8:
+    case ZYDIS_REGISTER_XMM9:
+    case ZYDIS_REGISTER_XMM10:
+    case ZYDIS_REGISTER_XMM11:
+    case ZYDIS_REGISTER_XMM12:
+    case ZYDIS_REGISTER_XMM13:
+    case ZYDIS_REGISTER_XMM14:
+    case ZYDIS_REGISTER_XMM15:
+      break;
+
+    default:
+      pInfo->pContext->regInfo[i] = 0;
+      break;
+    }
+  }
+}
+
 bool zydec_TranslateInstructionWithLinearContext(ZydecLinearContext *pContext, const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation, ZydecFormattingInfo *pInfo)
 {
   ZydecLinearContextFormatInfo formatContextInfo;
@@ -5651,7 +5687,7 @@ bool zydec_TranslateInstructionWithLinearContext(ZydecLinearContext *pContext, c
   newInfo.pRegUserData = newInfo.pCallUserData = &formatContextInfo;
   newInfo.pWriteRegister = nullptr; // TODO: !
   newInfo.pWriteResultRegister = nullptr; // TODO: !
-  newInfo.pAfterCall = nullptr; // TODO: !
+  newInfo.pAfterCall = zydec_LinearContext_AfterCall;
 
   const bool result = zydec_TranslateInstructionWithoutContext(pInstruction, pOperands, operandCount, virtualAddress, buffer, bufferCapacity, pHasTranslation, &newInfo);
 
