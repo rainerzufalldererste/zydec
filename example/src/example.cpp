@@ -45,6 +45,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static bool LinearMode = true;
+
+////////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **pArgv)
 {
   if (argc == 1)
@@ -83,6 +87,7 @@ int main(int argc, char **pArgv)
   char disasmBuffer[1024] = "";
   char decompBuffer[1024] = "";
   ZydecFormattingInfo info;
+  ZydecLinearContext linearContext;
   
   while (virtualAddress < fileSize)
   {
@@ -91,8 +96,16 @@ int main(int argc, char **pArgv)
 
     bool hasTranslation = false;
 
-    if (!zydec_TranslateInstructionWithoutContext(&instruction, operands, sizeof(operands) / sizeof(operands[0]), virtualAddress + addressDisplayOffset, decompBuffer, sizeof(decompBuffer), &hasTranslation, &info) || !hasTranslation)
-      decompBuffer[0] = '\0';
+    if (LinearMode)
+    {
+      if (!zydec_TranslateInstructionWithLinearContext(&linearContext, &instruction, operands, sizeof(operands) / sizeof(operands[0]), virtualAddress + addressDisplayOffset, decompBuffer, sizeof(decompBuffer), &hasTranslation, &info) || !hasTranslation)
+        decompBuffer[0] = '\0';
+    }
+    else
+    {
+      if (!zydec_TranslateInstructionWithoutContext(&instruction, operands, sizeof(operands) / sizeof(operands[0]), virtualAddress + addressDisplayOffset, decompBuffer, sizeof(decompBuffer), &hasTranslation, &info) || !hasTranslation)
+        decompBuffer[0] = '\0';
+    }
 
     printf("% 8" PRIX64 " | %-64s | %s\n", virtualAddress + addressDisplayOffset, disasmBuffer, decompBuffer);
 

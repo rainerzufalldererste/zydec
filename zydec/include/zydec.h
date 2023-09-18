@@ -73,7 +73,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
 struct ZydecLinearContext
 {
-  uint32_t hashState = 0x4CA7F00D;
+  uint64_t hashState = 0xBADC0FFEECA7F00D;
   uint32_t regInfo[ZYDIS_REGISTER_MAX_VALUE] = {};
 };
 

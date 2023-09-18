@@ -5676,6 +5676,95 @@ void zydec_LinearContext_AfterCall(void *pUserData)
   }
 }
 
+uint32_t zydec_LinearContext_NextRegisterName(ZydecLinearContext *pContext)
+{
+  bool firstRun = true;
+  uint32_t ret;
+
+  while (true)
+  {
+    const uint64_t oldState = pContext->hashState;
+    pContext->hashState = oldState * 6364136223846793005ULL | 1;
+
+    const uint32_t xorshifted = (uint32_t)(((oldState >> 18) ^ oldState) >> 27);
+    const uint32_t rot = (uint32_t)(oldState >> 59);
+
+    ret = (xorshifted >> rot) | (xorshifted << (uint32_t)((-(int32_t)rot) & 31));
+
+    if (!firstRun || ret != 0)
+      break;
+
+    firstRun = false;
+  }
+  
+  return ret;
+}
+
+bool zydec_LinearContext_WriteRegisterName(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, const uint32_t registerName)
+{
+  if (!zydec_WriteRegisterRaw(pBufferPos, pRemainingSize, reg))
+    return false;
+
+  if (registerName != 0)
+  {
+    if (!zydec_WriteRaw(pBufferPos, pRemainingSize, "_"))
+      return false;
+
+    static const char syllables[256][3] = {
+      "ba", "ca", "da", "fa", "ga", "ha", "ja", "ka", "la", "ma", "na", "pa", "qa", "ra", "sa", "ta", "va", "wa", "xa", "ya", "za",
+      "be", "ce", "de", "fe", "ge", "he", "je", "ke", "le", "me", "ne", "pe", "qe", "re", "se", "te", "ve", "we", "xe", "ye", "ze",
+      "bi", "ci", "di", "fi", "gi", "hi", "ji", "ki", "li", "mi", "ni", "pi", "qi", "ri", "si", "ti", "vi", "wi", "xi", "yi", "zi",
+      "bo", "co", "do", "fo", "go", "ho", "jo", "ko", "lo", "mo", "no", "po", "qo", "ro", "so", "to", "vo", "wo", "xo", "yo", "zo",
+      "bu", "cu", "du", "fu", "gu", "hu", "ju", "ku", "lu", "mu", "nu", "pu", "qu", "ru", "su", "tu", "vu", "wu", "xu", "yu", "zu",
+      "Ba", "Ca", "Da", "Fa", "Ga", "Ha", "Ja", "Ka", "La", "Ma", "Na", "Pa", "Qa", "Ra", "Sa", "Ta", "Va", "Wa", "Xa", "Ya", "Za",
+      "Be", "Ce", "De", "Fe", "Ge", "He", "Je", "Ke", "Le", "Me", "Ne", "Pe", "Qe", "Re", "Se", "Te", "Ve", "We", "Xe", "Ye", "Ze",
+      "Bi", "Ci", "Di", "Fi", "Gi", "Hi", "Ji", "Ki", "Li", "Mi", "Ni", "Pi", "Qi", "Ri", "Si", "Ti", "Vi", "Wi", "Xi", "Yi", "Zi",
+      "Bo", "Co", "Do", "Fo", "Go", "Ho", "Jo", "Ko", "Lo", "Mo", "No", "Po", "Qo", "Ro", "So", "To", "Vo", "Wo", "Xo", "Yo", "Zo",
+      "Bu", "Cu", "Du", "Fu", "Gu", "Hu", "Ju", "Ku", "Lu", "Mu", "Nu", "Pu", "Qu", "Ru", "Su", "Tu", "Vu", "Wu", "Xu", "Yu", "Zu",
+      "0a", "1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a",
+      /*"0e",*/ "1e", "2e", "3e", "4e", "5e", "6e", "7e", "8e", "9e",
+      /*"0i",*/ "1i", "2i", "3i", "4i", "5i", "6i", "7i", "8i", "9i",
+      /*"0o",*/ "1o", "2o", "3o", "4o", "5o", "6o", "7o", "8o", "9o",
+      /*"0u",*/ "1u", "2u", "3u", "4u", "5u", "6u", "7u", "8u", "9u",
+    };
+
+    uint32_t val = registerName;
+
+    for (size_t i = 0; i < sizeof(uint32_t); i += sizeof(uint8_t))
+    {
+      const uint8_t seg = (uint8_t)(val & 0xFF);
+
+      if (!zydec_WriteRaw(pBufferPos, pRemainingSize, syllables[seg]))
+        return false;
+
+      val >>= 8;
+    }
+  }
+
+  return true;
+}
+
+bool zydec_LinearContext_WriteRegister(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, void *pUserData)
+{
+  ZydecLinearContextFormatInfo *pInfo = static_cast<ZydecLinearContextFormatInfo *>(pUserData);
+
+  return zydec_LinearContext_WriteRegisterName(pBufferPos, pRemainingSize, reg, pInfo->pContext->regInfo[reg]);
+}
+
+bool zydec_LinearContext_WriteResultRegister(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, void *pUserData)
+{
+  ZydecLinearContextFormatInfo *pInfo = static_cast<ZydecLinearContextFormatInfo *>(pUserData);
+
+  const uint32_t newName = zydec_LinearContext_NextRegisterName(pInfo->pContext);
+  const bool result = zydec_LinearContext_WriteRegisterName(pBufferPos, pRemainingSize, reg, newName);
+
+  pInfo->assignedRegister[pInfo->assignedRegisterCount] = reg;
+  pInfo->assignedRegisterValue[pInfo->assignedRegisterCount] = newName;
+  pInfo->assignedRegisterCount++;
+
+  return result;
+}
+
 bool zydec_TranslateInstructionWithLinearContext(ZydecLinearContext *pContext, const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation, ZydecFormattingInfo *pInfo)
 {
   ZydecLinearContextFormatInfo formatContextInfo;
@@ -5685,8 +5774,8 @@ bool zydec_TranslateInstructionWithLinearContext(ZydecLinearContext *pContext, c
   ZydecFormattingInfo newInfo = *pInfo;
   newInfo.simplifyValueSelfModification = false;
   newInfo.pRegUserData = newInfo.pCallUserData = &formatContextInfo;
-  newInfo.pWriteRegister = nullptr; // TODO: !
-  newInfo.pWriteResultRegister = nullptr; // TODO: !
+  newInfo.pWriteRegister = zydec_LinearContext_WriteRegister;
+  newInfo.pWriteResultRegister = zydec_LinearContext_WriteResultRegister;
   newInfo.pAfterCall = zydec_LinearContext_AfterCall;
 
   const bool result = zydec_TranslateInstructionWithoutContext(pInstruction, pOperands, operandCount, virtualAddress, buffer, bufferCapacity, pHasTranslation, &newInfo);
@@ -6139,16 +6228,23 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
       }
       else
       {
-        ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base, pInfo, false));
+        if (pOperand->mem.base != ZYDIS_REGISTER_NONE)
+          ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base, pInfo, false));
 
         if (pOperand->mem.disp.has_displacement && pOperand->mem.disp.value != 0)
         {
-          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
+          if (pOperand->mem.base != ZYDIS_REGISTER_NONE)
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " "));
+
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "+ "));
           ERROR_CHECK(zydec_WriteInt(pBufferPos, pRemainingSize, pOperand->mem.disp.value));
         }
         else if (pOperand->mem.index != ZYDIS_REGISTER_NONE)
         {
-          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
+          if (pOperand->mem.base != ZYDIS_REGISTER_NONE)
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " "));
+
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "+ "));
 
           if (pOperand->mem.scale != 1)
             ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "("));
