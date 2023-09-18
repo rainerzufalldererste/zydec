@@ -48,11 +48,51 @@ struct ZydecFormattingInfo
 
   ResolveAddressToFriendlyName *pResolveAddressToFriendlyName = nullptr;
   void *pUserData = nullptr;
+
+  typedef bool RegisterAppendStringFunc(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, void *pUserData);
+
+  RegisterAppendStringFunc *pWriteRegister = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  RegisterAppendStringFunc *pWriteResultRegister = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  void *pRegUserData = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+
+  typedef void AfterCallFunc(void *pUserData);
+
+  AfterCallFunc *pAfterCall = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  void *pCallUserData = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+
+  bool simplifyCommonShorthands = true;
+  bool simplifyValueSelfModification = true; // only available with `zydec_TranslateInstructionWithoutContext`.
+  
+  enum class AfterCallRegisterRetentionMode
+  {
+    Linux,
+    Windows,
+
+    Default = 
+#if defined(_WIN32) || defined(_WIN64)
+      Windows
+#else
+      Linux
+#endif
+  };
+  
+  AfterCallRegisterRetentionMode afterCallRegisterRetentionMode = AfterCallRegisterRetentionMode::Default;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Currently requires all 10 operands.
 bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation, ZydecFormattingInfo *pInfo);
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct ZydecLinearContext
+{
+  uint64_t hashState = 0xBADC0FFEECA7F00D;
+  uint32_t regInfo[ZYDIS_REGISTER_MAX_VALUE] = {};
+};
+
+// Currently requires all 10 operands.
+bool zydec_TranslateInstructionWithLinearContext(ZydecLinearContext *pContext, const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation, ZydecFormattingInfo *pInfo);
 
 #endif // zydec_h__
