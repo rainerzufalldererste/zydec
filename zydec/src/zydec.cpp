@@ -5634,6 +5634,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 struct ZydecLinearContextFormatInfo
 {
   ZydecLinearContext *pContext = nullptr;
+  ZydecFormattingInfo *pOriginalInfo = nullptr;
   size_t assignedRegisterCount = 0;
   ZydisRegister assignedRegister[8];
   uint32_t assignedRegisterValue[8];
@@ -5641,32 +5642,21 @@ struct ZydecLinearContextFormatInfo
 
 bool zydec_TranslateInstructionWithLinearContext(ZydecLinearContext *pContext, const ZydisDecodedInstruction *pInstruction, const ZydisDecodedOperand *pOperands, const size_t operandCount, const size_t virtualAddress, char *buffer, const size_t bufferCapacity, bool *pHasTranslation, ZydecFormattingInfo *pInfo)
 {
-  const bool oldSelfModSimplify = pInfo->simplifyValueSelfModification;
-  pInfo->simplifyValueSelfModification = false;
-
   ZydecLinearContextFormatInfo formatContextInfo;
-  void *pOldRegUserData = pInfo->pRegUserData;
-  void *pOldCallUserData = pInfo->pCallUserData;
-  pInfo->pRegUserData = pInfo->pCallUserData = &formatContextInfo;
+  formatContextInfo.pContext = pContext;
+  formatContextInfo.pOriginalInfo = pInfo;
 
-  ZydecFormattingInfo::RegisterAppendStringFunc *pOldRegisterAppend = pInfo->pWriteRegister;
-  ZydecFormattingInfo::RegisterAppendStringFunc *pOldRegisterResultAppend = pInfo->pWriteResultRegister;
-  ZydecFormattingInfo::AfterCallFunc *pOldAfterCall = pInfo->pAfterCall;
-  pOldRegisterAppend = nullptr; // TODO: !
-  pOldRegisterResultAppend = nullptr; // TODO: !
-  pOldAfterCall = nullptr; // TODO: !
+  ZydecFormattingInfo newInfo = *pInfo;
+  newInfo.simplifyValueSelfModification = false;
+  newInfo.pRegUserData = newInfo.pCallUserData = &formatContextInfo;
+  newInfo.pWriteRegister = nullptr; // TODO: !
+  newInfo.pWriteResultRegister = nullptr; // TODO: !
+  newInfo.pAfterCall = nullptr; // TODO: !
 
-  const bool result = zydec_TranslateInstructionWithoutContext(pInstruction, pOperands, operandCount, virtualAddress, buffer, bufferCapacity, pHasTranslation, pInfo);
+  const bool result = zydec_TranslateInstructionWithoutContext(pInstruction, pOperands, operandCount, virtualAddress, buffer, bufferCapacity, pHasTranslation, &newInfo);
 
   for (size_t i = 0; i < formatContextInfo.assignedRegisterCount; i++)
     pContext->regInfo[formatContextInfo.assignedRegister[i]] = formatContextInfo.assignedRegisterValue[i];
-
-  pInfo->simplifyValueSelfModification = oldSelfModSimplify;
-  pInfo->pRegUserData = pOldRegUserData;
-  pInfo->pCallUserData = pOldCallUserData;
-  pInfo->pWriteRegister = pOldRegisterAppend;
-  pInfo->pWriteResultRegister = pOldRegisterResultAppend;
-  pInfo->pAfterCall = pOldAfterCall;
 
   return result;
 }
