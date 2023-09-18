@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -45,7 +46,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static const char ArgumentNoContext[] = "--no-context";
+static const char ArgumentLinearContext[] = "--linear";
+static const char ArgumentNoSimplification[] = "--no-simplify";
+static const char ArgumentIsaSet[] = "--isa";
+
 static bool LinearMode = true;
+static bool ShowIsaSet = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -53,11 +60,55 @@ int main(int argc, char **pArgv)
 {
   if (argc == 1)
   {
-    puts("Usage: example <RawAssembledBinaryFile>");
+    printf("Usage: example <RawAssembledBinaryFile> [%s / %s] [%s] [%s]\n", ArgumentNoContext, ArgumentLinearContext, ArgumentNoSimplification, ArgumentIsaSet);
     return 0;
   }
 
   const char *filename = pArgv[1];
+
+  ZydecFormattingInfo info;
+  ZydecLinearContext linearContext;
+
+  // Parse additional arguments.
+  if (argc > 2)
+  {
+    size_t argIndex = 2;
+    size_t argsRemaining = (size_t)argc - 2;
+
+    while (argsRemaining)
+    {
+      if (argsRemaining >= 1 && strncmp(pArgv[argIndex], ArgumentNoContext, sizeof(ArgumentNoContext)) == 0)
+      {
+        argIndex++;
+        argsRemaining--;
+        LinearMode = false;
+      }
+      else if (argsRemaining >= 1 && strncmp(pArgv[argIndex], ArgumentLinearContext, sizeof(ArgumentLinearContext)) == 0)
+      {
+        argIndex++;
+        argsRemaining--;
+        LinearMode = true;
+      }
+      else if (argsRemaining >= 1 && strncmp(pArgv[argIndex], ArgumentIsaSet, sizeof(ArgumentIsaSet)) == 0)
+      {
+        argIndex++;
+        argsRemaining--;
+        ShowIsaSet = true;
+      }
+      else if (argsRemaining >= 1 && strncmp(pArgv[argIndex], ArgumentNoSimplification, sizeof(ArgumentNoSimplification)) == 0)
+      {
+        argIndex++;
+        argsRemaining--;
+        info.simplifyCommonShorthands = false;
+        info.simplifyValueSelfModification = false;
+      }
+      else
+      {
+        printf("Invalid Parameter '%s'. Aborting.", pArgv[argIndex]);
+        return 1;
+      }
+    }
+  }
 
   FILE *pFile = fopen(filename, "rb");
   FATAL_IF(pFile == nullptr, "Failed to open file. Aborting.");
@@ -86,8 +137,6 @@ int main(int argc, char **pArgv)
 
   char disasmBuffer[1024] = "";
   char decompBuffer[1024] = "";
-  ZydecFormattingInfo info;
-  ZydecLinearContext linearContext;
   
   while (virtualAddress < fileSize)
   {
@@ -107,7 +156,16 @@ int main(int argc, char **pArgv)
         decompBuffer[0] = '\0';
     }
 
-    printf("% 8" PRIX64 " | %-64s | %s\n", virtualAddress + addressDisplayOffset, disasmBuffer, decompBuffer);
+    if (ShowIsaSet)
+    {
+      const char *isaSet = ZydisISASetGetString(instruction.meta.isa_set);
+
+      printf("% 8" PRIX64 " | %-64s | %-12s | %s\n", virtualAddress + addressDisplayOffset, disasmBuffer, isaSet ? isaSet : "", decompBuffer);
+    }
+    else
+    {
+      printf("% 8" PRIX64 " | %-64s | %s\n", virtualAddress + addressDisplayOffset, disasmBuffer, decompBuffer);
+    }
 
     virtualAddress += instruction.length;
   }
