@@ -5644,35 +5644,68 @@ void zydec_LinearContext_AfterCall(void *pUserData)
 {
   ZydecLinearContextFormatInfo *pInfo = static_cast<ZydecLinearContextFormatInfo *>(pUserData);
 
-  for (size_t i = 0; i < ZYDIS_REGISTER_MAX_VALUE; i++)
+  switch (pInfo->pOriginalInfo->afterCallRegisterRetentionMode)
   {
-    switch (i)
+  case ZydecFormattingInfo::AfterCallRegisterRetentionMode::Windows:
+  {
+    for (size_t i = 0; i < ZYDIS_REGISTER_MAX_VALUE; i++)
     {
-    case ZYDIS_REGISTER_RBX:
-    case ZYDIS_REGISTER_RBP:
-    case ZYDIS_REGISTER_RDI:
-    case ZYDIS_REGISTER_RSI:
-    case ZYDIS_REGISTER_RSP:
-    case ZYDIS_REGISTER_R12:
-    case ZYDIS_REGISTER_R13:
-    case ZYDIS_REGISTER_R14:
-    case ZYDIS_REGISTER_R15:
-    case ZYDIS_REGISTER_XMM6:
-    case ZYDIS_REGISTER_XMM7:
-    case ZYDIS_REGISTER_XMM8:
-    case ZYDIS_REGISTER_XMM9:
-    case ZYDIS_REGISTER_XMM10:
-    case ZYDIS_REGISTER_XMM11:
-    case ZYDIS_REGISTER_XMM12:
-    case ZYDIS_REGISTER_XMM13:
-    case ZYDIS_REGISTER_XMM14:
-    case ZYDIS_REGISTER_XMM15:
-      break;
+      switch (i)
+      {
+      case ZYDIS_REGISTER_RBX:
+      case ZYDIS_REGISTER_RBP:
+      case ZYDIS_REGISTER_RDI:
+      case ZYDIS_REGISTER_RSI:
+      case ZYDIS_REGISTER_RSP:
+      case ZYDIS_REGISTER_R12:
+      case ZYDIS_REGISTER_R13:
+      case ZYDIS_REGISTER_R14:
+      case ZYDIS_REGISTER_R15:
+      case ZYDIS_REGISTER_XMM6:
+      case ZYDIS_REGISTER_XMM7:
+      case ZYDIS_REGISTER_XMM8:
+      case ZYDIS_REGISTER_XMM9:
+      case ZYDIS_REGISTER_XMM10:
+      case ZYDIS_REGISTER_XMM11:
+      case ZYDIS_REGISTER_XMM12:
+      case ZYDIS_REGISTER_XMM13:
+      case ZYDIS_REGISTER_XMM14:
+      case ZYDIS_REGISTER_XMM15:
+        break;
 
-    default:
-      pInfo->pContext->regInfo[i] = 0;
-      break;
+      default:
+        pInfo->pContext->regInfo[i] = 0;
+        break;
+      }
     }
+
+    break;
+  }
+
+  default:
+  case ZydecFormattingInfo::AfterCallRegisterRetentionMode::Linux:
+  {
+    for (size_t i = 0; i < ZYDIS_REGISTER_MAX_VALUE; i++)
+    {
+      switch (i)
+      {
+      case ZYDIS_REGISTER_RBX:
+      case ZYDIS_REGISTER_RSP:
+      case ZYDIS_REGISTER_RBP:
+      case ZYDIS_REGISTER_R12:
+      case ZYDIS_REGISTER_R13:
+      case ZYDIS_REGISTER_R14:
+      case ZYDIS_REGISTER_R15:
+        break;
+
+      default:
+        pInfo->pContext->regInfo[i] = 0;
+        break;
+      }
+    }
+
+    break;
+  }
   }
 }
 

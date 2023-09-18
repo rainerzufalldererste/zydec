@@ -50,6 +50,8 @@ static const char ArgumentNoContext[] = "--no-context";
 static const char ArgumentLinearContext[] = "--linear";
 static const char ArgumentNoSimplification[] = "--no-simplify";
 static const char ArgumentIsaSet[] = "--isa";
+static const char ArgumentAfterCallRegisterRetentionWindows[] = "--register-retention=windows";
+static const char ArgumentAfterCallRegisterRetentionLinux[] = "--register-retention=linux";
 
 static bool LinearMode = true;
 static bool ShowIsaSet = false;
@@ -60,7 +62,7 @@ int main(int argc, char **pArgv)
 {
   if (argc == 1)
   {
-    printf("Usage: example <RawAssembledBinaryFile> [%s / %s] [%s] [%s]\n", ArgumentNoContext, ArgumentLinearContext, ArgumentNoSimplification, ArgumentIsaSet);
+    printf("Usage: example <RawAssembledBinaryFile>\n\t[%s / %s]\n\t[%s]\n\t[%s]\n\t[%s / %s]\n", ArgumentNoContext, ArgumentLinearContext, ArgumentNoSimplification, ArgumentIsaSet, ArgumentAfterCallRegisterRetentionWindows, ArgumentAfterCallRegisterRetentionLinux);
     return 0;
   }
 
@@ -101,6 +103,18 @@ int main(int argc, char **pArgv)
         argsRemaining--;
         info.simplifyCommonShorthands = false;
         info.simplifyValueSelfModification = false;
+      }
+      else if (argsRemaining >= 1 && strncmp(pArgv[argIndex], ArgumentAfterCallRegisterRetentionWindows, sizeof(ArgumentAfterCallRegisterRetentionWindows)) == 0)
+      {
+        argIndex++;
+        argsRemaining--;
+        info.afterCallRegisterRetentionMode = ZydecFormattingInfo::AfterCallRegisterRetentionMode::Windows;
+      }
+      else if (argsRemaining >= 1 && strncmp(pArgv[argIndex], ArgumentAfterCallRegisterRetentionLinux, sizeof(ArgumentAfterCallRegisterRetentionLinux)) == 0)
+      {
+        argIndex++;
+        argsRemaining--;
+        info.afterCallRegisterRetentionMode = ZydecFormattingInfo::AfterCallRegisterRetentionMode::Linux;
       }
       else
       {

@@ -62,6 +62,21 @@ struct ZydecFormattingInfo
 
   bool simplifyCommonShorthands = true;
   bool simplifyValueSelfModification = true; // only available with `zydec_TranslateInstructionWithoutContext`.
+  
+  enum class AfterCallRegisterRetentionMode
+  {
+    Linux,
+    Windows,
+
+    Default = 
+#if defined(_WIN32) || defined(_WIN64)
+    Windows
+#else
+    Linux
+#endif
+  };
+  
+  AfterCallRegisterRetentionMode afterCallRegisterRetentionMode = AfterCallRegisterRetentionMode::Default;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
