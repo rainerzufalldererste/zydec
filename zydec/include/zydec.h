@@ -55,6 +55,11 @@ struct ZydecFormattingInfo
   RegisterAppendStringFunc *pWriteResultRegister = nullptr;
   void *pRegUserData = nullptr;
 
+  typedef void AfterCallFunc(void *pUserData);
+
+  AfterCallFunc *pAfterCall = nullptr;
+  void *pCallUserData = nullptr;
+
   bool simplifyCommonShorthands = true;
   bool simplifyValueSelfModification = true;
 };
