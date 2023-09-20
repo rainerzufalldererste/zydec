@@ -85,6 +85,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_MOVNTSS:
   case ZYDIS_MNEMONIC_MOVQ2DQ:
   case ZYDIS_MNEMONIC_MOVSX:
+  case ZYDIS_MNEMONIC_MOVSXD:
   case ZYDIS_MNEMONIC_MOVZX:
   case ZYDIS_MNEMONIC_CBW:
   case ZYDIS_MNEMONIC_CDQ:
@@ -128,6 +129,11 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     case ZYDIS_MNEMONIC_MOVNTSD:
     case ZYDIS_MNEMONIC_MOVNTSS:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // move with non-temporal hint"));
+      return true;
+
+    case ZYDIS_MNEMONIC_MOVSX:
+    case ZYDIS_MNEMONIC_MOVSXD:
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // move with sign extension"));
       return true;
 
     default:
