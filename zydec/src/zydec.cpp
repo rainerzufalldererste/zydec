@@ -3576,16 +3576,19 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
     case ZYDIS_MNEMONIC_PMOVMSKB:
     case ZYDIS_MNEMONIC_VPMOVMSKB:
+      maySelfReference = false;
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_movemask_epi8("));
       break;
 
     case ZYDIS_MNEMONIC_MOVMSKPD:
     case ZYDIS_MNEMONIC_VMOVMSKPD:
+      maySelfReference = false;
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_movemask_pd("));
       break;
 
     case ZYDIS_MNEMONIC_MOVMSKPS:
     case ZYDIS_MNEMONIC_VMOVMSKPS:
+      maySelfReference = false;
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_movemask_ps("));
       break;
 
@@ -6702,12 +6705,35 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
       }
       else
       {
-        ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base, pInfo, false));
+        if (pOperand->mem.base != ZYDIS_REGISTER_NONE)
+          ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.base, pInfo, false));
 
-        if (pOperand->mem.disp.has_displacement)
+        if (pOperand->mem.disp.has_displacement && pOperand->mem.disp.value != 0)
         {
-          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
+          if (pOperand->mem.base != ZYDIS_REGISTER_NONE)
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " "));
+
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "+ "));
           ERROR_CHECK(zydec_WriteInt(pBufferPos, pRemainingSize, pOperand->mem.disp.value));
+        }
+        else if (pOperand->mem.index != ZYDIS_REGISTER_NONE)
+        {
+          if (pOperand->mem.base != ZYDIS_REGISTER_NONE)
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " "));
+
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "+ "));
+
+          if (pOperand->mem.scale != 1)
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "("));
+
+          ERROR_CHECK(zydec_WriteRegister(pBufferPos, pRemainingSize, pOperand->mem.index, pInfo, false));
+
+          if (pOperand->mem.scale != 1)
+          {
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " * "));
+            ERROR_CHECK(zydec_WriteUInt(pBufferPos, pRemainingSize, pOperand->mem.scale));
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
+          }
         }
 
         ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
