@@ -48,12 +48,14 @@
 
 static const char ArgumentNoContext[] = "--no-context";
 static const char ArgumentLinearContext[] = "--linear";
+static const char ArgumentLoopMode[] = "--loop";
 static const char ArgumentNoSimplification[] = "--no-simplify";
 static const char ArgumentIsaSet[] = "--isa";
 static const char ArgumentAfterCallRegisterRetentionWindows[] = "--register-retention=windows";
 static const char ArgumentAfterCallRegisterRetentionLinux[] = "--register-retention=linux";
 
 static bool LinearMode = true;
+static bool LoopMode = false;
 static bool ShowIsaSet = false;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +64,7 @@ int main(int argc, char **pArgv)
 {
   if (argc == 1)
   {
-    printf("Usage: example <RawAssembledBinaryFile>\n\t[%s / %s]\n\t[%s]\n\t[%s]\n\t[%s / %s]\n", ArgumentNoContext, ArgumentLinearContext, ArgumentNoSimplification, ArgumentIsaSet, ArgumentAfterCallRegisterRetentionWindows, ArgumentAfterCallRegisterRetentionLinux);
+    printf("Usage: example <RawAssembledBinaryFile>\n\t[%s / %s / %s]\n\t[%s]\n\t[%s]\n\t[%s / %s]\n", ArgumentNoContext, ArgumentLinearContext, ArgumentLoopMode, ArgumentNoSimplification, ArgumentIsaSet, ArgumentAfterCallRegisterRetentionWindows, ArgumentAfterCallRegisterRetentionLinux);
     return 0;
   }
 
@@ -90,6 +92,13 @@ int main(int argc, char **pArgv)
         argIndex++;
         argsRemaining--;
         LinearMode = true;
+      }
+      else if (argsRemaining >= 1 && strncmp(pArgv[argIndex], ArgumentLoopMode, sizeof(ArgumentLoopMode)) == 0)
+      {
+        argIndex++;
+        argsRemaining--;
+        LinearMode = true;
+        LoopMode = true;
       }
       else if (argsRemaining >= 1 && strncmp(pArgv[argIndex], ArgumentIsaSet, sizeof(ArgumentIsaSet)) == 0)
       {
@@ -151,6 +160,37 @@ int main(int argc, char **pArgv)
 
   char disasmBuffer[1024] = "";
   char decompBuffer[1024] = "";
+
+  if (LoopMode && LinearMode)
+  {
+    const uint64_t hashStateBefore = linearContext.hashState;
+    size_t addr = 0;
+
+    while (addr < fileSize)
+    {
+      if (!(ZYAN_SUCCESS(ZydisDecoderDecodeFull(&decoder, pData + addr, fileSize - addr, &instruction, operands))))
+      {
+        puts("Failed to decode instruction in loop pre-run. Aborting pre-run.");
+        break;
+      }
+
+      bool hasTranslation;
+
+      zydec_TranslateInstructionWithLinearContext(&linearContext, &instruction, operands, sizeof(operands) / sizeof(operands[0]), addr + addressDisplayOffset, decompBuffer, sizeof(decompBuffer), &hasTranslation, &info);
+
+      if (instruction.length == 0)
+      {
+        puts("Invalid instruction length in loop pre-run. Aborting pre-run.");
+        break;
+      }
+
+      addr += instruction.length;
+    }
+
+    linearContext.hashState = hashStateBefore;
+  }
+
+  printf("// %s\n\n", filename);
   
   while (virtualAddress < fileSize)
   {
@@ -181,6 +221,7 @@ int main(int argc, char **pArgv)
       printf("% 8" PRIX64 " | %-64s | %s\n", virtualAddress + addressDisplayOffset, disasmBuffer, decompBuffer);
     }
 
+    FATAL_IF(instruction.length == 0, "Invalid instruction length. Aborting.");
     virtualAddress += instruction.length;
   }
 
