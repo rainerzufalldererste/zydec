@@ -227,6 +227,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     case ZYDIS_MNEMONIC_CMOVZ:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "zero_flag"));
       break;
+
+    default:
+      break;
     }
 
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ") "));
@@ -470,6 +473,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
           ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = 0"));
           match = true;
           break;
+
+        default:
+          break;
         }
 
         if (match)
@@ -535,6 +541,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       case ZYDIS_MNEMONIC_SARX:
         ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " >>= "));
         break;
+
+      default:
+        break;
       }
     }
     else
@@ -596,6 +605,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       case ZYDIS_MNEMONIC_SARX:
         ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " >> "));
         break;
+
+      default:
+        break;
       }
     }
 
@@ -615,6 +627,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     case ZYDIS_MNEMONIC_ADOX:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " + overflow_flag; // unsigned integer add with overflow_flag"));
       return true;
+
+    default:
+      break;
     }
 
     break;
@@ -697,6 +712,8 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // unsigned integer multiply"));
     case ZYDIS_MNEMONIC_IDIV:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // signed integer multiply"));
+    default:
+      break;
     }
 
     return true;
@@ -777,6 +794,8 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // unsigned integer divide"));
     case ZYDIS_MNEMONIC_IDIV:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "; // signed integer divide"));
+    default:
+      break;
     }
 
     return true;
@@ -879,6 +898,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     case ZYDIS_MNEMONIC_SETZ:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "zero_flag"));
       break;
+
+    default:
+      break;
     }
 
     ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " ? 1 : 0);"));
@@ -923,6 +945,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
     case ZYDIS_MNEMONIC_SETZ:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " // if zero / equal"));
+      break;
+
+    default:
       break;
     }
 
@@ -994,6 +1019,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     case ZYDIS_MNEMONIC_KTESTQ:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_ktest"));
       break;
+
+    default:
+      break;
     }
 
     switch (pInstruction->mnemonic)
@@ -1016,6 +1044,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     case ZYDIS_MNEMONIC_KORTESTQ:
     case ZYDIS_MNEMONIC_KTESTQ:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_u64"));
+      break;
+
+    default:
       break;
     }
 
@@ -1071,6 +1102,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     case ZYDIS_MNEMONIC_VSCATTERPF0QPS:
     case ZYDIS_MNEMONIC_VSCATTERPF1QPS:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "_mm_prefetch_i64scatter_ps("));
+      break;
+
+    default:
       break;
     }
 
@@ -1162,6 +1196,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
           match = true;
           ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "0"));
           break;
+
+        default:
+          break;
         }
 
         if (match)
@@ -1216,6 +1253,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     case ZYDIS_MNEMONIC_KXORD:
     case ZYDIS_MNEMONIC_KXORQ:
       ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " ^ "));
+      break;
+
+    default:
       break;
     }
 
@@ -2464,6 +2504,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
         case ZYDIS_MNEMONIC_VPCMPEQQ:
           match = true;
           ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "-1"));
+          break;
+
+        default:
           break;
         }
 
