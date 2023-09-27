@@ -470,7 +470,7 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
 
         case ZYDIS_MNEMONIC_XOR:
           ERROR_CHECK(zydec_WriteResultOperand(&bufferPos, &remainingSize, &pOperands[0], virtualAddress, pInfo));
-          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = 0"));
+          ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, " = 0;"));
           match = true;
           break;
 

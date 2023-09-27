@@ -15,11 +15,6 @@ project(ProjectName)
     cppdialect "C++11"
   filter { }
   
-  filter { "configurations:Release" }
-    flags { "LinkTimeOptimization" }
-  
-  filter { }
-  
   defines { "_CRT_SECURE_NO_WARNINGS", "SSE2" }
   
   objdir "intermediate/obj"
