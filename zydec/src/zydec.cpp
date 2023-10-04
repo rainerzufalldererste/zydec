@@ -302,9 +302,9 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
     ERROR_CHECK(zydec_WriteOperand(&bufferPos, &remainingSize, &pOperands[1], virtualAddress, pInfo));
 
     if (pInstruction->mnemonic == ZYDIS_MNEMONIC_TEST)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ") // set flags: carry, parity, zero"));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "); // set flags: carry, parity, zero"));
     else if (pInstruction->mnemonic == ZYDIS_MNEMONIC_CMP)
-      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, ") // set flags: carry, overflow, signed, zero, aux_carry and parity"));
+      ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "); // set flags: carry, overflow, signed, zero, aux_carry and parity"));
     else
       return false;
 
