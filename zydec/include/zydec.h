@@ -77,7 +77,6 @@ struct ZydecFormattingInfo
     BitScanF,
     BitScanR,
     PopCnt,
-
     Cmp,
     Pack,
     Unpack,

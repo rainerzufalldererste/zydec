@@ -6676,7 +6676,10 @@ bool zydec_LinearContext_WriteResultRegister(char **pBufferPos, size_t *pRemaini
 
   if (pInfo->regHint != ZYDIS_REGISTER_NONE)
   {
-    newName = pInfo->pContext->regInfo[pInfo->regHint];
+    const uint32_t hintedReg = pInfo->pContext->regInfo[pInfo->regHint];
+
+    if (hintedReg != 0)
+      newName = hintedReg;
   }
   else if (pInfo->hasValHint && (pInfo->valHint == 0 || pInfo->valHint == (int64_t)-1))
   {
@@ -6786,6 +6789,7 @@ bool zydec_LinearContext_WriteResultRegister(char **pBufferPos, size_t *pRemaini
       break;
 
     case ZydecFormattingInfo::Mov:
+    case ZydecFormattingInfo::ConditionalMov:
       newName &= 0xFFFF0000;
       newName |= 0xE7B1; // `Mov_`
       break;
