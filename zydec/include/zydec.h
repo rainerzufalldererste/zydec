@@ -49,10 +49,65 @@ struct ZydecFormattingInfo
   ResolveAddressToFriendlyName *pResolveAddressToFriendlyName = nullptr;
   void *pUserData = nullptr;
 
-  typedef bool RegisterAppendStringFunc(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, void *pUserData);
+  typedef bool RegisterAppendStringFunc(char **pBufferPos, size_t *pRemainingSize, const ZydisRegister reg, void *pRegUserData);
+  
+  enum HintOperation
+  {
+    None,
+
+    Mov,
+    Set,
+    ConditionalMov,
+    AddressOf,
+    
+    Add,
+    Sub,
+    Mul,
+    Div,
+    Mod,
+    And,
+    AndNot,
+    Or,
+    XOr,
+    Neg,
+    ShL,
+    ShR,
+    Inc,
+    Dec,
+    BitScanF,
+    BitScanR,
+    PopCnt,
+
+    Cmp,
+    Pack,
+    Unpack,
+    Abs,
+    Blend,
+    Broadcast,
+    Shuffle,
+    Permute,
+    Round,
+    Convert,
+    DotProduct,
+    Extract,
+    Gather,
+    Max,
+    Min,
+    Mask,
+    Test,
+    Not,
+    XNor,
+  };
+
+  typedef void SetResultHintReg(const ZydisRegister reg, void *pRegUserData);
+  typedef void SetResultHintVal(const int64_t value, void *pRegUserData);
+  typedef void SetResultHintOp(const HintOperation op, void *pRegUserData);
 
   RegisterAppendStringFunc *pWriteRegister = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
   RegisterAppendStringFunc *pWriteResultRegister = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  SetResultHintReg *pSetHintReg = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  SetResultHintVal *pSetHintVal = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
+  SetResultHintOp *pSetHintOp = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
   void *pRegUserData = nullptr; // only available with `zydec_TranslateInstructionWithoutContext`.
 
   typedef void AfterCallFunc(void *pUserData);
@@ -62,6 +117,7 @@ struct ZydecFormattingInfo
 
   bool simplifyCommonShorthands = true;
   bool simplifyValueSelfModification = true; // only available with `zydec_TranslateInstructionWithoutContext`.
+  bool acceptHints = true;
   
   enum class AfterCallRegisterRetentionMode
   {
