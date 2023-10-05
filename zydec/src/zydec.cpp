@@ -100,6 +100,15 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_KMOVQ:
   case ZYDIS_MNEMONIC_KMOVW:
   {
+    if (simplifyShorthands)
+    {
+      if (pInstruction->operand_count == 2 && pOperands[0].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[0].reg.value == pOperands[1].reg.value)
+      {
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "// nop"));
+        return true;
+      }
+    }
+
     zydec_HintOp(ZydecFormattingInfo::Mov, pInfo);
     zydec_HintOperand(&pOperands[1], pInfo);
 
