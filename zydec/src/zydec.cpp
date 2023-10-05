@@ -53,6 +53,7 @@ bool zydec_WriteRegisterRaw(char **pBufferPos, size_t *pRemainingSize, const Zyd
 bool zydec_WriteHex(char **pBufferPos, size_t *pRemainingSize, const uint64_t value);
 bool zydec_WriteUInt(char **pBufferPos, size_t *pRemainingSize, const uint64_t value);
 bool zydec_WriteInt(char **pBufferPos, size_t *pRemainingSize, const int64_t value);
+ZydisRegister zydec_ResolveBaseRegister(const ZydisRegister reg);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -99,6 +100,15 @@ bool zydec_TranslateInstructionWithoutContext(const ZydisDecodedInstruction *pIn
   case ZYDIS_MNEMONIC_KMOVQ:
   case ZYDIS_MNEMONIC_KMOVW:
   {
+    if (simplifyShorthands)
+    {
+      if (pInstruction->operand_count == 2 && pOperands[0].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[1].type == ZYDIS_OPERAND_TYPE_REGISTER && pOperands[0].reg.value == pOperands[1].reg.value)
+      {
+        ERROR_CHECK(zydec_WriteRaw(&bufferPos, &remainingSize, "// nop"));
+        return true;
+      }
+    }
+
     zydec_HintOp(ZydecFormattingInfo::Mov, pInfo);
     zydec_HintOperand(&pOperands[1], pInfo);
 
@@ -6676,10 +6686,11 @@ bool zydec_LinearContext_WriteResultRegister(char **pBufferPos, size_t *pRemaini
 
   if (pInfo->regHint != ZYDIS_REGISTER_NONE)
   {
-    const uint32_t hintedReg = pInfo->pContext->regInfo[pInfo->regHint];
+    ZydisRegister baseRegister = zydec_ResolveBaseRegister(pInfo->regHint);
+    const uint32_t hintedRegName = pInfo->pContext->regInfo[baseRegister];
 
-    if (hintedReg != 0)
-      newName = hintedReg;
+    if (hintedRegName != 0)
+      newName = hintedRegName;
   }
   else if (pInfo->hasValHint && (pInfo->valHint == 0 || pInfo->valHint == (int64_t)-1))
   {
@@ -6735,7 +6746,7 @@ bool zydec_LinearContext_WriteResultRegister(char **pBufferPos, size_t *pRemaini
 
     case ZydecFormattingInfo::Or:
       newName &= 0xFFFF0000;
-      newName |= 0xE3E0; // `_o_r`
+      newName |= 0xE33F; // `bor_`
       break;
 
     case ZydecFormattingInfo::XOr:
