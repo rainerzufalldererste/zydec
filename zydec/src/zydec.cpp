@@ -7782,13 +7782,13 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
           if (friendlyNameOffset != 0)
             zydec_WriteRaw(pBufferPos, pRemainingSize, "(");
 
-          zydec_WriteRaw(pBufferPos, pRemainingSize, friendlyName);
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, friendlyName));
 
           if (friendlyNameOffset != 0)
           {
-            zydec_WriteRaw(pBufferPos, pRemainingSize, " + ");
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
             ERROR_CHECK(zydec_WriteHex(pBufferPos, pRemainingSize, friendlyNameOffset));
-            zydec_WriteRaw(pBufferPos, pRemainingSize, ")");
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
           }
         }
         else
@@ -7854,21 +7854,23 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
         if (pInfo->pResolveAddressToFriendlyName != nullptr && pInfo->pResolveAddressToFriendlyName(ptr, friendlyName, sizeof(friendlyName), &friendlyNameOffset, pInfo->pUserData))
         {
           if (friendlyNameOffset != 0)
-            zydec_WriteRaw(pBufferPos, pRemainingSize, "(");
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "("));
 
-          zydec_WriteRaw(pBufferPos, pRemainingSize, friendlyName);
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, friendlyName));
 
           if (friendlyNameOffset != 0)
           {
-            zydec_WriteRaw(pBufferPos, pRemainingSize, " + ");
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
             ERROR_CHECK(zydec_WriteHex(pBufferPos, pRemainingSize, friendlyNameOffset));
-            zydec_WriteRaw(pBufferPos, pRemainingSize, ")");
+            ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
           }
         }
         else
         {
           ERROR_CHECK(zydec_WriteHex(pBufferPos, pRemainingSize, ptr));
         }
+        
+        ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
       }
       else
       {
@@ -7926,15 +7928,15 @@ bool zydec_WriteOperand(char **pBufferPos, size_t *pRemainingSize, const ZydisDe
       if (pInfo->pResolveAddressToFriendlyName != nullptr && pInfo->pResolveAddressToFriendlyName(virtualAddress + pOperand->imm.value.u, friendlyName, sizeof(friendlyName), &friendlyNameOffset, pInfo->pUserData))
       {
         if (friendlyNameOffset != 0)
-          zydec_WriteRaw(pBufferPos, pRemainingSize, "(");
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, "("));
 
-        zydec_WriteRaw(pBufferPos, pRemainingSize, friendlyName);
+        ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, friendlyName));
 
         if (friendlyNameOffset != 0)
         {
-          zydec_WriteRaw(pBufferPos, pRemainingSize, " + ");
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, " + "));
           ERROR_CHECK(zydec_WriteHex(pBufferPos, pRemainingSize, friendlyNameOffset));
-          zydec_WriteRaw(pBufferPos, pRemainingSize, ")");
+          ERROR_CHECK(zydec_WriteRaw(pBufferPos, pRemainingSize, ")"));
         }
       }
       else
